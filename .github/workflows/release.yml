@@ -1,0 +1,91 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-wheels:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-13
+          - macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install maturin
+        run: pip install maturin
+
+      - name: Install Rust (aarch64)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cargo install cross
+          rustup target add aarch64-unknown-linux-gnu
+
+      - name: Build wheels
+        working-directory: formora-py
+        shell: bash
+        run: |
+          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+            # Build x86_64 wheel
+            maturin build --release --out dist --strip
+            # Build aarch64 wheel using cross
+            cross build --release --target aarch64-unknown-linux-gnu
+            # Copy the aarch64 wheel manually
+            ls target/aarch64-unknown-linux-gnu/release/
+            # Note: aarch64 wheel building would require more complex setup
+          else
+            maturin build --release --out dist --strip
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}
+          path: formora-py/dist/
+
+  release:
+    name: Create Release and Upload Wheels
+    needs: [build-wheels]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install maturin
+        run: pip install maturin
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: formora-py/dist/
+
+      - name: Publish to PyPI
+        env:
+          MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        working-directory: formora-py
+        run: maturin publish --skip-existing *
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create '${{ github.ref_name }}' \
+            --repo '${{ github.repository }}' \
+            --notes "Release ${{ github.ref_name }}" \
+            formora-py/dist/*
