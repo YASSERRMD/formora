@@ -1,0 +1,55 @@
+name: Test
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-rust:
+    name: Test Rust Core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run tests
+        working-directory: formora-core
+        run: cargo test --verbose --all-features
+
+  test-python:
+    name: Test Python Bindings
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install maturin
+        run: pip install maturin pytest
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build and install
+        working-directory: formora-py
+        run: pip install -e .
+      - name: Run basic import test
+        run: python -c "from formora import Form; print('Import successful')"
+      - name: Create simple form
+        run: |
+          python -c "
+          from formora import Form, CssFramework
+          html = Form('test').css(CssFramework.BOOTSTRAP).text('name', 'Name').build()
+          assert 'form' in html.lower()
+          print('Basic form creation successful')
+          "
