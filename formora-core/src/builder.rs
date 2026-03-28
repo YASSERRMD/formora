@@ -1,18 +1,19 @@
-// Form builder - fluent API for constructing forms
-// Implementation will be added in later phases
-
 use crate::schema::{FormSchema, FieldSchema};
 use crate::css::CssProfile;
 
 /// Fluent builder for constructing FormSchema
 pub struct FormBuilder {
-    schema: FormSchema,
+    pub schema: FormSchema,
+    pub step_titles: Vec<Option<String>>,
+    current_step_index: Option<usize>,
 }
 
 impl FormBuilder {
     pub fn new(form_id: String) -> Self {
         FormBuilder {
             schema: FormSchema::new(form_id),
+            step_titles: Vec::new(),
+            current_step_index: None,
         }
     }
 
@@ -42,17 +43,28 @@ impl FormBuilder {
         self
     }
 
-    pub fn multi_step(mut self, multi_step: bool) -> Self {
-        self.schema.multi_step = multi_step;
+    pub fn step(mut self, title: Option<String>) -> Self {
+        self.schema.multi_step = true;
+        self.step_titles.push(title);
+        self.current_step_index = Some(self.step_titles.len() - 1);
         self
     }
 
-    pub fn add_field(mut self, field: FieldSchema) -> Self {
+    pub fn add_field(mut self, mut field: FieldSchema) -> Self {
+        if self.schema.multi_step && self.current_step_index.is_some() {
+            field.step_index = self.current_step_index;
+        } else if self.schema.multi_step {
+            // Optional fallback if add_field is called before step()
+            field.step_index = Some(0);
+        }
         self.schema.fields.push(field);
         self
     }
 
-    pub fn build(self) -> FormSchema {
+    pub fn build(mut self) -> FormSchema {
+        if self.schema.multi_step {
+            crate::steps::assign_step_indices(&mut self.schema, self.step_titles.clone());
+        }
         self.schema
     }
 }
