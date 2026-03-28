@@ -88,35 +88,102 @@ pub fn render(schema: &FormSchema) -> String {
     // Form element
     html.push_str(r#"<form>"#);
 
-    // Render fields
-    for field in &schema.fields {
-        render_field(&mut html, schema, field);
-    }
-
-    // Submit button
-    let button_wrapper_class = &schema.css_profile.button_wrapper;
-    let button_class = &schema.css_profile.button_submit;
-
-    if !button_wrapper_class.is_empty() {
-        html.push_str(&format!(r#"<div class="{}">"#, button_wrapper_class));
+    if schema.multi_step && !schema.steps.is_empty() {
+        let step_wrapper_class = &schema.css_profile.step_wrapper;
+        let step_title_class = &schema.css_profile.step_title;
+        let button_wrapper_class = &schema.css_profile.button_wrapper;
+        let button_back_class = &schema.css_profile.button_back;
+        let button_next_class = &schema.css_profile.button_next;
+        let button_submit_class = &schema.css_profile.button_submit;
+        
+        for (i, step) in schema.steps.iter().enumerate() {
+            let display_style = if i == 0 { "" } else { r#" style="display:none""# };
+            
+            if !step_wrapper_class.is_empty() {
+                html.push_str(&format!(
+                    r#"<div class="{}" data-step="{}"{}>"#,
+                    step_wrapper_class, i, display_style
+                ));
+            } else {
+                html.push_str(&format!(
+                    r#"<div data-step="{}"{}>"#,
+                    i, display_style
+                ));
+            }
+            
+            if let Some(title) = &step.title {
+                if !step_title_class.is_empty() {
+                    html.push_str(&format!(r#"<div class="{}">{}</div>"#, step_title_class, escape_html(title)));
+                } else {
+                    html.push_str(&format!(r#"<div>{}</div>"#, escape_html(title)));
+                }
+            }
+            
+            for field in schema.fields.iter().filter(|f| f.step_index == Some(i)) {
+                render_field(&mut html, schema, field);
+            }
+            
+            if !button_wrapper_class.is_empty() {
+                html.push_str(&format!(r#"<div class="{}">"#, button_wrapper_class));
+            } else {
+                html.push_str(r#"<div>"#);
+            }
+            
+            if i > 0 {
+                if !button_back_class.is_empty() {
+                    html.push_str(&format!(r#"<button type="button" class="{}" data-action="prev">Back</button>"#, button_back_class));
+                } else {
+                    html.push_str(r#"<button type="button" data-action="prev">Back</button>"#);
+                }
+            }
+            
+            if i < schema.steps.len() - 1 {
+                if !button_next_class.is_empty() {
+                    html.push_str(&format!(r#"<button type="button" class="{}" data-action="next">Next</button>"#, button_next_class));
+                } else {
+                    html.push_str(r#"<button type="button" data-action="next">Next</button>"#);
+                }
+            } else {
+                if !button_submit_class.is_empty() {
+                    html.push_str(&format!(r#"<button type="submit" class="{}">{}</button>"#, button_submit_class, escape_html(&schema.submit_label)));
+                } else {
+                    html.push_str(&format!(r#"<button type="submit">{}</button>"#, escape_html(&schema.submit_label)));
+                }
+            }
+            
+            html.push_str("</div></div>");
+        }
     } else {
-        html.push_str(r#"<div>"#);
-    }
+        // Render fields sequentially
+        for field in &schema.fields {
+            render_field(&mut html, schema, field);
+        }
 
-    if !button_class.is_empty() {
-        html.push_str(&format!(
-            r#"<button type="submit" class="{}">{}</button>"#,
-            button_class,
-            escape_html(&schema.submit_label)
-        ));
-    } else {
-        html.push_str(&format!(
-            r#"<button type="submit">{}</button>"#,
-            escape_html(&schema.submit_label)
-        ));
-    }
+        // Submit button
+        let button_wrapper_class = &schema.css_profile.button_wrapper;
+        let button_class = &schema.css_profile.button_submit;
 
-    html.push_str("</div>");
+        if !button_wrapper_class.is_empty() {
+            html.push_str(&format!(r#"<div class="{}">"#, button_wrapper_class));
+        } else {
+            html.push_str(r#"<div>"#);
+        }
+
+        if !button_class.is_empty() {
+            html.push_str(&format!(
+                r#"<button type="submit" class="{}">{}</button>"#,
+                button_class,
+                escape_html(&schema.submit_label)
+            ));
+        } else {
+            html.push_str(&format!(
+                r#"<button type="submit">{}</button>"#,
+                escape_html(&schema.submit_label)
+            ));
+        }
+
+        html.push_str("</div>");
+    }
     html.push_str("</form>");
 
     // Success and error messages
