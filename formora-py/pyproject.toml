@@ -28,6 +28,12 @@ classifiers = [
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
+python-source = "formora"
 
 [project.optional-dependencies]
 llm = []
+dev = ["pyo3-stub-gen>=0.3.0"]
+
+[tool.stub-gen]
+# Configure pyo3-stub-gen settings
+virtual_path = "formora/formora"
