@@ -188,7 +188,7 @@ fn render_field(html: &mut String, schema: &FormSchema, field: &crate::schema::F
     let field_hidden_class = &schema.css_profile.field_hidden;
 
     // Check initial visibility
-    let is_visible = if let Some(condition) = &field.show_if {
+    let is_visible = if let Some(_condition) = &field.show_if {
         // For now, default to visible if there's a condition
         // In a full implementation, we'd evaluate against default values
         true
@@ -356,7 +356,7 @@ fn render_input_element(
             let wrapper_class = &schema.css_profile.input_checkbox_wrapper;
             let input_class = &schema.css_profile.input_checkbox;
             let label_class = &schema.css_profile.input_checkbox_label;
-            let checked = field.default_value.as_ref().map(|v| v.as_bool()).unwrap_or(false);
+            let checked = field.default_value.as_ref().and_then(|v| v.as_bool()).unwrap_or(false);
             html.push_str(&render_checkbox(
                 &field.id,
                 wrapper_class,
@@ -394,10 +394,10 @@ fn render_input_element(
         }
         FieldType::Range => {
             let input_class = &schema.css_profile.input_range;
-            let min = field.min.unwrap_or(0);
-            let max = field.max.unwrap_or(100);
-            let step = field.step.unwrap_or(1);
-            let default_val = field.default_value.as_ref().and_then(|v| v.as_f64()).unwrap_or(min as f64);
+            let min = field.min.unwrap_or(0.0);
+            let max = field.max.unwrap_or(100.0);
+            let step = field.step.unwrap_or(1.0);
+            let default_val = field.default_value.as_ref().and_then(|v| v.as_f64()).unwrap_or(min);
             html.push_str(&render_range(
                 &field.id,
                 input_class,

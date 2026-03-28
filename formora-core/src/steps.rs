@@ -18,7 +18,7 @@ pub fn assign_step_indices(schema: &mut FormSchema, step_titles: Vec<Option<Stri
     // Clear existing steps
     schema.steps.clear();
 
-    for (index, field) in schema.fields.iter_mut().enumerate() {
+    for (_index, field) in schema.fields.iter_mut().enumerate() {
         field.step_index = Some(current_step);
 
         // Move to next step if we've filled this one

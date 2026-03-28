@@ -2,7 +2,6 @@
 // Serializes validation rules into JSON for the data-rules attribute
 
 use crate::schema::ValidationRule;
-use serde_json::json;
 
 /// Serialize validation rules to a compact JSON string
 pub fn serialize_rules(rules: &[ValidationRule]) -> String {

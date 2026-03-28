@@ -1,7 +1,7 @@
 // Form builder - fluent API for constructing forms
 // Implementation will be added in later phases
 
-use crate::schema::{FormSchema, FieldSchema, FieldType, ValidationRule, Condition, SelectOption, StepMeta};
+use crate::schema::{FormSchema, FieldSchema};
 use crate::css::CssProfile;
 
 /// Fluent builder for constructing FormSchema
