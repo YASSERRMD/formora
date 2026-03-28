@@ -1,16 +1,51 @@
-// Bootstrap 5 CSS profile implementation
-// See CssProfile::bootstrap() in profile.rs for the actual implementation
-// This module provides helper functions for Bootstrap-specific functionality
+use crate::css::profile::CssProfile;
 
-use super::CssProfile;
+pub fn bootstrap() -> CssProfile {
 
-/// Get the Bootstrap 5 CSS profile
-pub fn profile() -> CssProfile {
-    CssProfile::bootstrap()
+CssProfile {
+        form_wrapper: String::new(),
+        form_title: "h5 mb-3 fw-semibold".to_string(),
+        form_description: "text-muted mb-3 small".to_string(),
+        step_wrapper: String::new(),
+        step_title: "h6 mb-2".to_string(),
+        progress_bar_wrapper: "progress mb-4".to_string(),
+        progress_bar_fill: "progress-bar".to_string(),
+        progress_bar_label: "small text-muted mb-1".to_string(),
+        field_group: "mb-3".to_string(),
+        field_label: "form-label".to_string(),
+        field_required_marker: "text-danger ms-1".to_string(),
+        field_help_text: "form-text text-muted".to_string(),
+        field_error_message: "invalid-feedback d-block".to_string(),
+        input_text: "form-control".to_string(),
+        input_email: "form-control".to_string(),
+        input_number: "form-control".to_string(),
+        input_textarea: "form-control".to_string(),
+        input_select: "form-select".to_string(),
+        input_date: "form-control".to_string(),
+        input_file: "form-control".to_string(),
+        input_range: "form-range".to_string(),
+        input_range_value_display: "form-text text-muted".to_string(),
+        input_checkbox_wrapper: "form-check".to_string(),
+        input_checkbox: "form-check-input".to_string(),
+        input_checkbox_label: "form-check-label".to_string(),
+        input_radio_wrapper: "form-check".to_string(),
+        input_radio: "form-check-input".to_string(),
+        input_radio_label: "form-check-label".to_string(),
+        multi_select_wrapper: "border rounded p-2 d-flex flex-wrap gap-1 min-height-38".to_string(),
+        multi_select_tag: "badge bg-primary d-flex align-items-center gap-1".to_string(),
+        multi_select_tag_remove: "btn-close btn-close-white ms-1".to_string(),
+        multi_select_dropdown: "list-group position-absolute w-100 z-index-100".to_string(),
+        multi_select_option: "list-group-item list-group-item-action py-1 px-2 small".to_string(),
+        input_error_state: "is-invalid".to_string(),
+        input_valid_state: "is-valid".to_string(),
+        field_hidden: "d-none".to_string(),
+        button_submit: "btn btn-primary".to_string(),
+        button_next: "btn btn-primary".to_string(),
+        button_back: "btn btn-secondary me-2".to_string(),
+        button_wrapper: "d-flex justify-content-end mt-3 gap-2".to_string(),
+        success_wrapper: "alert alert-success mt-3".to_string(),
+        success_message: String::new(),
+        error_wrapper: "alert alert-danger mt-3".to_string(),
+        error_message: String::new(),
 }
-
-/// Get the minimum inline styles needed for custom Bootstrap theme
-/// Not used in standard Bootstrap mode - user is expected to have Bootstrap loaded
-pub fn minimal_inline_styles() -> String {
-    String::new()
 }
