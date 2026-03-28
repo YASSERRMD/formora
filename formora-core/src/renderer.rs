@@ -424,21 +424,62 @@ fn render_input_element(
         }
         FieldType::MultiSelect => {
             // Multi-select is handled as a custom widget
-            // This will be fully implemented in Phase 2
             let wrapper_class = &schema.css_profile.multi_select_wrapper;
+            let dropdown_class = &schema.css_profile.multi_select_dropdown;
+            let option_class = &schema.css_profile.multi_select_option;
+
             if !wrapper_class.is_empty() {
                 html.push_str(&format!(
-                    r#"<div class="{}" id="{}-container" data-rules='{}'>"#,
+                    r#"<div class="{}" id="{}-container" data-rules='{}">"#,
                     wrapper_class, field.id, data_rules
                 ));
             } else {
                 html.push_str(&format!(
-                    r#"<div id="{}-container" data-rules='{}'>"#,
+                    r#"<div id="{}-container" data-rules='{}">"#,
                     field.id, data_rules
                 ));
             }
+
+            // Add search input
+            html.push_str(&format!(
+                r#"<input type="text" id="{}-search" placeholder="Type to search..." autocomplete="off">"#,
+                field.id
+            ));
+
             html.push_str("</div>");
-            html.push_str(&format!(r#"<input type="hidden" id="{}" name="{}" value="[]">"#, field.id, field.id));
+
+            // Add hidden input for actual value
+            html.push_str(&format!(
+                r#"<input type="hidden" id="{}" name="{}" value="[]">"#,
+                field.id, field.id
+            ));
+
+            // Add dropdown with options
+            let options = field.options.as_ref().map(|o| o.as_slice()).unwrap_or(&[]);
+            if !dropdown_class.is_empty() {
+                html.push_str(&format!(r#"<div class="{}" id="{}-dropdown" style="display:none">"#, dropdown_class, field.id));
+            } else {
+                html.push_str(&format!(r#"<div id="{}-dropdown" style="display:none">"#, field.id));
+            }
+
+            for option in options {
+                if !option_class.is_empty() {
+                    html.push_str(&format!(
+                        r#"<div class="{}" data-value="{}">{}</div>"#,
+                        option_class,
+                        escape_html(&option.value),
+                        escape_html(&option.label)
+                    ));
+                } else {
+                    html.push_str(&format!(
+                        r#"<div data-value="{}">{}</div>"#,
+                        escape_html(&option.value),
+                        escape_html(&option.label)
+                    ));
+                }
+            }
+
+            html.push_str("</div>");
         }
     }
 }
@@ -753,16 +794,484 @@ fn escape_html(s: &str) -> String {
 
 /// Render inline JavaScript
 fn render_javascript(schema: &FormSchema) -> String {
-    // This will be fully implemented in Phase 2
-    // For now, return a basic script placeholder
+    let is_multi_step = schema.multi_step;
+    let steps_count = schema.steps.len();
+    let form_id = &schema.form_id;
+    let input_error_class = &schema.css_profile.input_error_state;
+    let field_hidden_class = &schema.css_profile.field_hidden;
+    let multi_select_tag_class = &schema.css_profile.multi_select_tag;
+    let multi_select_tag_remove_class = &schema.css_profile.multi_select_tag_remove;
+    let multi_select_option_class = &schema.css_profile.multi_select_option;
+
+    // Build CSS class assignments as JS code
+    let hidden_class_js = if field_hidden_class.is_empty() {
+        "null".to_string()
+    } else {
+        format!("'{}'", field_hidden_class)
+    };
+
+    let error_class_js = if input_error_class.is_empty() {
+        "null".to_string()
+    } else {
+        format!("'{}'", input_error_class)
+    };
+
+    let tag_class_js = if multi_select_tag_class.is_empty() {
+        "''".to_string()
+    } else {
+        format!("'{}'", multi_select_tag_class)
+    };
+
+    let tag_remove_class_js = if multi_select_tag_remove_class.is_empty() {
+        "''".to_string()
+    } else {
+        format!("'{}'", multi_select_tag_remove_class)
+    };
+
+    let option_class_js = if multi_select_option_class.is_empty() {
+        "''".to_string()
+    } else {
+        format!("'{}'", multi_select_option_class)
+    };
+
     format!(
         r#"<script>
-(function() {{
+(function(){{
   const formId = "{}";
-  // Interactive behavior will be added in Phase 2
-  console.log('Formora widget loaded:', formId);
+  const isMultiStep = {};
+  const stepsCount = {};
+  const hiddenClass = {};
+  const errorClass = {};
+  const tagClass = {};
+  const tagRemoveClass = {};
+  const optionClass = {};
+  let currentStep = 0;
+
+  // Helper: Get widget element
+  function getWidget() {{
+    return document.querySelector('[data-formora-id="' + formId + '"]');
+  }}
+
+  // Helper: Get form element
+  function getForm() {{
+    const widget = getWidget();
+    return widget ? widget.querySelector('form') : null;
+  }}
+
+  // Helper: Evaluate condition
+  function evaluateCondition(condition, fieldValue) {{
+    if (!condition) return true;
+    const op = condition.operator;
+    const condVal = condition.value;
+
+    switch (op) {{
+      case 'eq':
+        return String(fieldValue) === String(condVal);
+      case 'neq':
+        return String(fieldValue) !== String(condVal);
+      case 'contains':
+        return String(fieldValue).includes(String(condVal));
+      case 'gt':
+        return parseFloat(fieldValue) > parseFloat(condVal);
+      case 'lt':
+        return parseFloat(fieldValue) < parseFloat(condVal);
+      case 'in_list':
+        return Array.isArray(condVal) && condVal.includes(fieldValue);
+      default:
+        return true;
+    }}
+  }}
+
+  // Update field visibility based on conditions
+  function updateFieldVisibility() {{
+    const widget = getWidget();
+    if (!widget) return;
+
+    const fields = widget.querySelectorAll('[data-field-id]');
+    fields.forEach(function(fieldGroup) {{
+      const conditionAttr = fieldGroup.getAttribute('data-condition');
+      if (!conditionAttr) return;
+
+      try {{
+        const condition = JSON.parse(conditionAttr);
+        const referencedField = widget.querySelector('[name="' + condition.field_id + '"]');
+        if (!referencedField) return;
+
+        let fieldValue = referencedField.value;
+        if (referencedField.type === 'checkbox') {{
+          fieldValue = referencedField.checked;
+        }}
+
+        const isVisible = evaluateCondition(condition, fieldValue);
+
+        if (isVisible) {{
+          fieldGroup.style.display = '';
+          if (hiddenClass) fieldGroup.classList.remove(hiddenClass);
+        }} else {{
+          fieldGroup.style.display = 'none';
+          if (hiddenClass) fieldGroup.classList.add(hiddenClass);
+          // Clear value when hidden
+          const input = fieldGroup.querySelector('[name]');
+          if (input) {{
+            if (input.type === 'checkbox') {{
+              input.checked = false;
+            }} else {{
+              input.value = '';
+            }}
+          }}
+        }}
+      }} catch (e) {{
+        console.error('Error evaluating condition:', e);
+      }}
+    }});
+  }}
+
+  // Validate a single field
+  function validateField(field) {{
+    const rulesAttr = field.getAttribute('data-rules');
+    if (!rulesAttr) return true;
+
+    try {{
+      const rules = JSON.parse(rulesAttr);
+      const value = field.value;
+      const fieldGroup = field.closest('[data-field-id]');
+      const errorDiv = fieldGroup ? fieldGroup.querySelector('[id$="-error"]') : null;
+
+      for (const rule of rules) {{
+        if (!evaluateRule(rule, value)) {{
+          if (errorDiv) {{
+            errorDiv.textContent = rule.message || getDefaultMessage(rule);
+            errorDiv.style.display = '';
+          }}
+          if (errorClass) field.classList.add(errorClass);
+          return false;
+        }}
+      }}
+
+      if (errorDiv) errorDiv.style.display = 'none';
+      if (errorClass) field.classList.remove(errorClass);
+      return true;
+    }} catch (e) {{
+      console.error('Error validating field:', e);
+      return true;
+    }}
+  }}
+
+  // Evaluate a validation rule
+  function evaluateRule(rule, value) {{
+    switch (rule.rule_type) {{
+      case 'required':
+        return value && value !== '' && value !== '[]';
+      case 'min_length':
+        return value.length >= rule.value;
+      case 'max_length':
+        return value.length <= rule.value;
+      case 'min':
+        return parseFloat(value) >= parseFloat(rule.value);
+      case 'max':
+        return parseFloat(value) <= parseFloat(rule.value);
+      case 'regex':
+        return new RegExp(rule.value).test(value);
+      case 'email':
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+      default:
+        return true;
+    }}
+  }}
+
+  // Get default error message for rule
+  function getDefaultMessage(rule) {{
+    switch (rule.rule_type) {{
+      case 'required': return 'This field is required';
+      case 'min_length': return 'Minimum ' + rule.value + ' characters required';
+      case 'max_length': return 'Maximum ' + rule.value + ' characters allowed';
+      case 'min': return 'Value must be at least ' + rule.value;
+      case 'max': return 'Value must be at most ' + rule.value;
+      case 'regex': return 'Invalid format';
+      case 'email': return 'Please enter a valid email address';
+      default: return 'Invalid value';
+    }}
+  }}
+
+  // Validate current step
+  function validateCurrentStep() {{
+    if (!isMultiStep) return true;
+
+    const widget = getWidget();
+    const stepDiv = widget.querySelector('[data-step="' + currentStep + '"]');
+    if (!stepDiv) return true;
+
+    const fields = stepDiv.querySelectorAll('input:not([type="hidden"]), select, textarea');
+    let isValid = true;
+    let firstError = null;
+
+    fields.forEach(function(field) {{
+      const fieldGroup = field.closest('[data-field-id]');
+      if (fieldGroup && fieldGroup.style.display === 'none') return;
+
+      if (!validateField(field)) {{
+        isValid = false;
+        if (!firstError) firstError = field;
+      }}
+    }});
+
+    if (!isValid && firstError) {{
+      firstError.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
+      firstError.focus();
+    }}
+
+    return isValid;
+  }}
+
+  // Update progress bar
+  function updateProgress() {{
+    if (!isMultiStep) return;
+
+    const widget = getWidget();
+    const progressBar = widget.getElementById(formId + '-progress');
+    const progressLabel = widget.querySelector('.progress-bar-label');
+
+    if (progressBar) {{
+      const percent = ((currentStep + 1) / stepsCount) * 100;
+      progressBar.style.width = percent + '%';
+    }}
+
+    if (progressLabel) {{
+      progressLabel.textContent = 'Step ' + (currentStep + 1) + ' of ' + stepsCount;
+    }}
+  }}
+
+  // Show step
+  function showStep(stepIndex) {{
+    const widget = getWidget();
+    const steps = widget.querySelectorAll('[data-step]');
+
+    steps.forEach(function(step, index) {{
+      if (index === stepIndex) {{
+        step.style.display = '';
+      }} else {{
+        step.style.display = 'none';
+      }}
+    }});
+
+    currentStep = stepIndex;
+    updateProgress();
+  }}
+
+  // Multi-select widget initialization
+  function initMultiSelect() {{
+    const widget = getWidget();
+    const multiSelects = widget.querySelectorAll('[id$="-container"]');
+
+    multiSelects.forEach(function(container) {{
+      const fieldId = container.id.replace('-container', '');
+      const hiddenInput = document.getElementById(fieldId);
+      const dropdown = document.getElementById(fieldId + '-dropdown');
+      const searchInput = document.getElementById(fieldId + '-search');
+
+      let selectedValues = [];
+
+      // Render tags
+      function renderTags() {{
+        // Clear existing tags
+        const existingTags = container.querySelectorAll(tagClass || '.formora-multi-select-tag');
+        existingTags.forEach(t => t.remove());
+
+        selectedValues.forEach(function(val) {{
+          const option = dropdown.querySelector('[data-value="' + val + '"]');
+          const label = option ? option.textContent : val;
+
+          const tag = document.createElement('span');
+          if (tagClass) tag.className = tagClass;
+          tag.innerHTML = label + '<span class="' + tagRemoveClass + '" data-value="' + val + '">&times;</span>';
+          container.insertBefore(tag, searchInput);
+        }});
+
+        hiddenInput.value = JSON.stringify(selectedValues);
+      }}
+
+      // Show dropdown
+      searchInput.addEventListener('focus', function() {{
+        dropdown.style.display = '';
+      }});
+
+      // Filter options
+      searchInput.addEventListener('input', function() {{
+        const query = this.value.toLowerCase();
+        const options = dropdown.querySelectorAll(optionClass || '.formora-multi-select-option');
+        options.forEach(function(opt) {{
+          const text = opt.textContent.toLowerCase();
+          opt.style.display = text.includes(query) ? '' : 'none';
+        }});
+      }});
+
+      // Select option
+      dropdown.addEventListener('click', function(e) {{
+        const option = e.target.closest(optionClass || '.formora-multi-select-option');
+        if (!option) return;
+
+        const value = option.getAttribute('data-value');
+        if (!selectedValues.includes(value)) {{
+          selectedValues.push(value);
+          renderTags();
+        }}
+        searchInput.value = '';
+      }});
+
+      // Remove tag
+      container.addEventListener('click', function(e) {{
+        if (e.target.classList.contains(tagRemoveClass.replace('.', '') || 'formora-multi-select-remove')) {{
+          const value = e.target.getAttribute('data-value');
+          selectedValues = selectedValues.filter(v => v !== value);
+          renderTags();
+        }}
+      }});
+
+      // Hide dropdown on click outside
+      document.addEventListener('click', function(e) {{
+        if (!container.contains(e.target)) {{
+          dropdown.style.display = 'none';
+        }}
+      }});
+    }});
+  }}
+
+  // Serialize and send form data
+  function submitForm(e) {{
+    e.preventDefault();
+
+    const form = getForm();
+    const widget = getWidget();
+    if (!form || !widget) return;
+
+    // Validate all fields
+    const fields = form.querySelectorAll('[name]');
+    let isValid = true;
+    let firstError = null;
+
+    fields.forEach(function(field) {{
+      const fieldGroup = field.closest('[data-field-id]');
+      if (fieldGroup && fieldGroup.style.display === 'none') return;
+
+      if (field.type !== 'hidden' && !validateField(field)) {{
+        isValid = false;
+        if (!firstError) firstError = field;
+      }}
+    }});
+
+    if (!isValid) {{
+      if (firstError) {{
+        firstError.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
+        firstError.focus();
+      }}
+      return;
+    }}
+
+    // Collect data
+    const data = {{}};
+    fields.forEach(function(field) {{
+      const fieldGroup = field.closest('[data-field-id]');
+      if (fieldGroup && fieldGroup.style.display === 'none') return;
+
+      const name = field.name;
+      let value = field.value;
+
+      if (field.type === 'checkbox') {{
+        value = field.checked;
+      }} else if (field.type === 'number' || field.type === 'range') {{
+        value = parseFloat(value) || 0;
+      }} else if (field.type === 'hidden') {{
+        try {{
+          value = JSON.parse(value);
+        }} catch (e) {{
+          // Keep as string
+        }}
+      }}
+
+      data[name] = value;
+    }});
+
+    // Build result
+    const result = {{
+      form_id: formId,
+      data: data
+    }};
+
+    // Serialize
+    const message = '__formora__' + JSON.stringify(result);
+
+    // Dispatch event
+    window.dispatchEvent(new CustomEvent('formora:submit', {{
+      detail: {{
+        raw: message,
+        parsed: data
+      }}
+    }}));
+
+    // Hide form, show success
+    form.style.display = 'none';
+    const successDiv = document.getElementById(formId + '-success');
+    if (successDiv) {{
+      successDiv.style.display = '';
+    }}
+  }}
+
+  // Initialize on DOM ready
+  function init() {{
+    const form = getForm();
+    const widget = getWidget();
+    if (!form || !widget) return;
+
+    // Set up visibility updates on input changes
+    widget.addEventListener('change', updateFieldVisibility);
+    widget.addEventListener('input', updateFieldVisibility);
+
+    // Initial visibility check
+    updateFieldVisibility();
+
+    // Multi-select widget
+    initMultiSelect();
+
+    // Form submission
+    form.addEventListener('submit', submitForm);
+
+    // Multi-step navigation
+    if (isMultiStep) {{
+      widget.addEventListener('click', function(e) {{
+        const action = e.target.getAttribute('data-action');
+        if (!action) return;
+
+        e.preventDefault();
+
+        if (action === 'next') {{
+          if (validateCurrentStep()) {{
+            showStep(currentStep + 1);
+          }}
+        }} else if (action === 'prev') {{
+          showStep(currentStep - 1);
+        }}
+      }});
+
+      // Show first step
+      showStep(0);
+    }}
+  }}
+
+  // Run initialization
+  if (document.readyState === 'loading') {{
+    document.addEventListener('DOMContentLoaded', init);
+  }} else {{
+    init();
+  }}
 }})();
 </script>"#,
-        schema.form_id
+        form_id,
+        is_multi_step,
+        steps_count,
+        hidden_class_js,
+        error_class_js,
+        tag_class_js,
+        tag_remove_class_js,
+        option_class_js
     )
 }
