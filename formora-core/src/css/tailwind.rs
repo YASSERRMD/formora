@@ -1,16 +1,51 @@
-// Tailwind CSS v3 profile implementation
-// See CssProfile::tailwind() in profile.rs for the actual implementation
-// This module provides helper functions for Tailwind-specific functionality
+use crate::css::profile::CssProfile;
 
-use super::CssProfile;
+pub fn tailwind() -> CssProfile {
 
-/// Get the Tailwind CSS v3 profile
-pub fn profile() -> CssProfile {
-    CssProfile::tailwind()
+CssProfile {
+        form_wrapper: "space-y-4".to_string(),
+        form_title: "text-lg font-semibold text-gray-800 dark:text-gray-100".to_string(),
+        form_description: "text-sm text-gray-500 dark:text-gray-400".to_string(),
+        step_wrapper: "space-y-4".to_string(),
+        step_title: "text-base font-medium text-gray-700 dark:text-gray-200".to_string(),
+        progress_bar_wrapper: "w-full bg-gray-200 rounded-full h-1.5 mb-4 dark:bg-gray-700".to_string(),
+        progress_bar_fill: "bg-blue-600 h-1.5 rounded-full transition-all duration-300".to_string(),
+        progress_bar_label: "text-xs text-gray-500 mb-1 dark:text-gray-400".to_string(),
+        field_group: "flex flex-col gap-1".to_string(),
+        field_label: "text-sm font-medium text-gray-700 dark:text-gray-300".to_string(),
+        field_required_marker: "text-red-500 ml-0.5".to_string(),
+        field_help_text: "text-xs text-gray-400 dark:text-gray-500".to_string(),
+        field_error_message: "text-xs text-red-500 mt-0.5".to_string(),
+        input_text: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100".to_string(),
+        input_email: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100".to_string(),
+        input_number: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100".to_string(),
+        input_textarea: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100".to_string(),
+        input_select: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100".to_string(),
+        input_date: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100".to_string(),
+        input_file: "w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100".to_string(),
+        input_range: "w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500".to_string(),
+        input_range_value_display: "text-xs text-gray-500 text-right".to_string(),
+        input_checkbox_wrapper: "flex items-center gap-2".to_string(),
+        input_checkbox: "h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500".to_string(),
+        input_checkbox_label: "text-sm text-gray-700 dark:text-gray-300".to_string(),
+        input_radio_wrapper: "flex items-center gap-2".to_string(),
+        input_radio: "h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500".to_string(),
+        input_radio_label: "text-sm text-gray-700 dark:text-gray-300".to_string(),
+        multi_select_wrapper: "border border-gray-300 rounded-md p-2 flex flex-wrap gap-1 min-h-[40px] cursor-text dark:border-gray-600 dark:bg-gray-800".to_string(),
+        multi_select_tag: "bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full flex items-center gap-1 dark:bg-blue-900 dark:text-blue-200".to_string(),
+        multi_select_tag_remove: "text-blue-500 hover:text-blue-700 font-bold leading-none dark:text-blue-400".to_string(),
+        multi_select_dropdown: "absolute w-full bg-white border border-gray-200 rounded-md shadow-lg z-50 mt-1 dark:bg-gray-800 dark:border-gray-600".to_string(),
+        multi_select_option: "px-3 py-2 text-sm hover:bg-blue-50 cursor-pointer dark:hover:bg-gray-700 dark:text-gray-200".to_string(),
+        input_error_state: "border-red-500 focus:ring-red-500".to_string(),
+        input_valid_state: "border-green-500 focus:ring-green-500".to_string(),
+        field_hidden: "hidden".to_string(),
+        button_submit: "bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500".to_string(),
+        button_next: "bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500".to_string(),
+        button_back: "bg-gray-100 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-200 transition-colors mr-2 dark:bg-gray-700 dark:text-gray-200".to_string(),
+        button_wrapper: "flex justify-end mt-4 gap-2".to_string(),
+        success_wrapper: "bg-green-50 border border-green-200 text-green-800 rounded-md p-3 mt-3 text-sm dark:bg-green-900 dark:border-green-700 dark:text-green-200".to_string(),
+        success_message: String::new(),
+        error_wrapper: "bg-red-50 border border-red-200 text-red-800 rounded-md p-3 mt-3 text-sm dark:bg-red-900 dark:border-red-700 dark:text-red-200".to_string(),
+        error_message: String::new(),
 }
-
-/// Get the minimum inline styles needed for custom Tailwind theme
-/// Not used in standard Tailwind mode - user is expected to have Tailwind configured
-pub fn minimal_inline_styles() -> String {
-    String::new()
 }
