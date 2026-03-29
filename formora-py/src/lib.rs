@@ -51,8 +51,9 @@ pub struct PyCssProfile {
 #[pymethods]
 impl PyCssProfile {
     #[new]
-    #[pyo3(signature = (framework=CssFramework::bootstrap()))]
-    fn new(framework: CssFramework) -> Self {
+    #[pyo3(signature = (framework=None))]
+    fn new(framework: Option<CssFramework>) -> Self {
+        let framework = framework.unwrap_or_else(CssFramework::bootstrap);
         let profile = match framework.value.as_str() {
             "bootstrap" => CssProfile::bootstrap(),
             "tailwind" => CssProfile::tailwind(),
@@ -75,11 +76,13 @@ impl PyCssProfile {
         })
     }
 
-    fn override_(&self, kwargs: &PyDict) -> PyResult<PyCssProfile> {
+    #[pyo3(signature = (**kwargs))]
+    fn override_(&self, py: Python<'_>, kwargs: Option<&PyDict>) -> PyResult<PyCssProfile> {
+        let kwargs = kwargs.unwrap_or_else(|| PyDict::new(py));
         let mut map = HashMap::new();
 
         // Copy all current field values to map
-        macro_rules add_to_map {
+        macro_rules! add_to_map {
             ($field:ident) => {{
                 if !self.profile.$field.is_empty() {
                     map.insert(stringify!($field).to_string(), self.profile.$field.clone());
@@ -282,16 +285,16 @@ impl PyForm {
         Ok(PyForm { schema: self.schema.clone() })
     }
 
-    fn css(&mut self, framework_or_profile: Py<PyAny>) -> PyResult<PyForm> {
+    fn css(&mut self, py: Python<'_>, framework_or_profile: Py<PyAny>) -> PyResult<PyForm> {
         // Check if it's a CssFramework or CssProfile
-        let profile = if let Ok(fw) = framework_or_profile.extract::<CssFramework>() {
+        let profile = if let Ok(fw) = framework_or_profile.extract::<CssFramework>(py) {
             match fw.value.as_str() {
                 "bootstrap" => CssProfile::bootstrap(),
                 "tailwind" => CssProfile::tailwind(),
                 "custom" => CssProfile::custom(),
                 _ => CssProfile::bootstrap(),
             }
-        } else if let Ok(profile) = framework_or_profile.extract::<PyCssProfile>() {
+        } else if let Ok(profile) = framework_or_profile.extract::<PyCssProfile>(py) {
             profile.profile.clone()
         } else {
             CssProfile::bootstrap()
@@ -302,16 +305,20 @@ impl PyForm {
     }
 
     fn step(&mut self, title: Option<String>) -> PyResult<PyForm> {
-        // Step tracking - for simplicity, we'll track this externally
-        // This is a placeholder for multi-step forms
+        self.schema.multi_step = true;
+        self.schema.steps.push(formora_core::schema::StepMeta {
+            index: self.schema.steps.len(),
+            title,
+            field_ids: vec![],
+        });
         Ok(PyForm { schema: self.schema.clone() })
     }
 
     fn text(&mut self, id: String, label: String, placeholder: Option<String>, required: Option<bool>,
-            help_text: Option<String>, default: Option<Py<PyAny>>, rules: Vec<PyRule>,
+            help_text: Option<String>, default: Option<Py<PyAny>>, rules: Option<Vec<PyRule>>,
             show_if: Option<PyCondition>) -> PyResult<PyForm> {
         let default_value = default.map(|v| python_to_json(v)).transpose()?;
-        let rule_vec = rules.into_iter().map(|r| r.rule).collect();
+        let rule_vec = rules.unwrap_or_default().into_iter().map(|r| r.rule).collect();
         let show_if_cond = show_if.map(|c| c.condition);
 
         let field = FieldSchema {
@@ -338,9 +345,9 @@ impl PyForm {
     }
 
     fn email(&mut self, id: String, label: String, required: Option<bool>, help_text: Option<String>,
-             default: Option<Py<PyAny>>, rules: Vec<PyRule>, show_if: Option<PyCondition>) -> PyResult<PyForm> {
+             default: Option<Py<PyAny>>, rules: Option<Vec<PyRule>>, show_if: Option<PyCondition>) -> PyResult<PyForm> {
         let default_value = default.map(|v| python_to_json(v)).transpose()?;
-        let rule_vec = rules.into_iter().map(|r| r.rule).collect();
+        let rule_vec = rules.unwrap_or_default().into_iter().map(|r| r.rule).collect();
         let show_if_cond = show_if.map(|c| c.condition);
 
         let field = FieldSchema {
@@ -368,9 +375,9 @@ impl PyForm {
 
     fn number(&mut self, id: String, label: String, min: Option<f64>, max: Option<f64>,
               required: Option<bool>, help_text: Option<String>, default: Option<Py<PyAny>>,
-              rules: Vec<PyRule>, show_if: Option<PyCondition>) -> PyResult<PyForm> {
+              rules: Option<Vec<PyRule>>, show_if: Option<PyCondition>) -> PyResult<PyForm> {
         let default_value = default.map(|v| python_to_json(v)).transpose()?;
-        let rule_vec = rules.into_iter().map(|r| r.rule).collect();
+        let rule_vec = rules.unwrap_or_default().into_iter().map(|r| r.rule).collect();
         let show_if_cond = show_if.map(|c| c.condition);
 
         let field = FieldSchema {
@@ -398,9 +405,9 @@ impl PyForm {
 
     fn textarea(&mut self, id: String, label: String, rows: Option<u32>, placeholder: Option<String>,
                 required: Option<bool>, help_text: Option<String>, default: Option<Py<PyAny>>,
-                rules: Vec<PyRule>, show_if: Option<PyCondition>) -> PyResult<PyForm> {
+                rules: Option<Vec<PyRule>>, show_if: Option<PyCondition>) -> PyResult<PyForm> {
         let default_value = default.map(|v| python_to_json(v)).transpose()?;
-        let rule_vec = rules.into_iter().map(|r| r.rule).collect();
+        let rule_vec = rules.unwrap_or_default().into_iter().map(|r| r.rule).collect();
         let show_if_cond = show_if.map(|c| c.condition);
 
         let field = FieldSchema {
@@ -428,9 +435,9 @@ impl PyForm {
 
     fn select(&mut self, id: String, label: String, options: Vec<(String, String)>,
               required: Option<bool>, help_text: Option<String>, default: Option<Py<PyAny>>,
-              rules: Vec<PyRule>, show_if: Option<PyCondition>) -> PyResult<PyForm> {
+              rules: Option<Vec<PyRule>>, show_if: Option<PyCondition>) -> PyResult<PyForm> {
         let default_value = default.map(|v| python_to_json(v)).transpose()?;
-        let rule_vec = rules.into_iter().map(|r| r.rule).collect();
+        let rule_vec = rules.unwrap_or_default().into_iter().map(|r| r.rule).collect();
         let show_if_cond = show_if.map(|c| c.condition);
 
         let option_vec = options.into_iter().map(|(label, value)| SelectOption { label, value }).collect();
@@ -460,9 +467,9 @@ impl PyForm {
 
     fn multi_select(&mut self, id: String, label: String, options: Vec<(String, String)>,
                     required: Option<bool>, help_text: Option<String>, default: Option<Py<PyAny>>,
-                    rules: Vec<PyRule>, show_if: Option<PyCondition>) -> PyResult<PyForm> {
+                    rules: Option<Vec<PyRule>>, show_if: Option<PyCondition>) -> PyResult<PyForm> {
         let default_value = default.map(|v| python_to_json(v)).transpose()?;
-        let rule_vec = rules.into_iter().map(|r| r.rule).collect();
+        let rule_vec = rules.unwrap_or_default().into_iter().map(|r| r.rule).collect();
         let show_if_cond = show_if.map(|c| c.condition);
 
         let option_vec = options.into_iter().map(|(label, value)| SelectOption { label, value }).collect();
@@ -491,9 +498,9 @@ impl PyForm {
     }
 
     fn checkbox(&mut self, id: String, label: String, default: Option<bool>, help_text: Option<String>,
-                rules: Vec<PyRule>, show_if: Option<PyCondition>) -> PyResult<PyForm> {
+                rules: Option<Vec<PyRule>>, show_if: Option<PyCondition>) -> PyResult<PyForm> {
         let default_value = default.map(|v| serde_json::json!(v));
-        let rule_vec = rules.into_iter().map(|r| r.rule).collect();
+        let rule_vec = rules.unwrap_or_default().into_iter().map(|r| r.rule).collect();
         let show_if_cond = show_if.map(|c| c.condition);
 
         let field = FieldSchema {
@@ -521,9 +528,9 @@ impl PyForm {
 
     fn radio(&mut self, id: String, label: String, options: Vec<(String, String)>,
              required: Option<bool>, help_text: Option<String>, default: Option<Py<PyAny>>,
-             rules: Vec<PyRule>, show_if: Option<PyCondition>) -> PyResult<PyForm> {
+             rules: Option<Vec<PyRule>>, show_if: Option<PyCondition>) -> PyResult<PyForm> {
         let default_value = default.map(|v| python_to_json(v)).transpose()?;
-        let rule_vec = rules.into_iter().map(|r| r.rule).collect();
+        let rule_vec = rules.unwrap_or_default().into_iter().map(|r| r.rule).collect();
         let show_if_cond = show_if.map(|c| c.condition);
 
         let option_vec = options.into_iter().map(|(label, value)| SelectOption { label, value }).collect();
@@ -552,9 +559,9 @@ impl PyForm {
     }
 
     fn date(&mut self, id: String, label: String, required: Option<bool>, help_text: Option<String>,
-            default: Option<Py<PyAny>>, rules: Vec<PyRule>, show_if: Option<PyCondition>) -> PyResult<PyForm> {
+            default: Option<Py<PyAny>>, rules: Option<Vec<PyRule>>, show_if: Option<PyCondition>) -> PyResult<PyForm> {
         let default_value = default.map(|v| python_to_json(v)).transpose()?;
-        let rule_vec = rules.into_iter().map(|r| r.rule).collect();
+        let rule_vec = rules.unwrap_or_default().into_iter().map(|r| r.rule).collect();
         let show_if_cond = show_if.map(|c| c.condition);
 
         let field = FieldSchema {
@@ -609,9 +616,9 @@ impl PyForm {
     }
 
     fn file(&mut self, id: String, label: String, accept: Option<Vec<String>>,
-            required: Option<bool>, help_text: Option<String>, rules: Vec<PyRule>,
+            required: Option<bool>, help_text: Option<String>, rules: Option<Vec<PyRule>>,
             show_if: Option<PyCondition>) -> PyResult<PyForm> {
-        let rule_vec = rules.into_iter().map(|r| r.rule).collect();
+        let rule_vec = rules.unwrap_or_default().into_iter().map(|r| r.rule).collect();
         let show_if_cond = show_if.map(|c| c.condition);
 
         let field = FieldSchema {
@@ -693,12 +700,14 @@ impl PyFormResult {
 
     #[getter]
     fn data(&self, py: Python) -> PyResult<PyObject> {
-        json_to_python(py, &serde_json::to_value(&self.result.data)?)
+        let val = serde_json::to_value(&self.result.data).map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
+        json_to_python(py, &val)
     }
 
     #[getter]
     fn typed_data(&self, py: Python) -> PyResult<PyObject> {
-        json_to_python(py, &serde_json::to_value(&self.result.typed_data)?)
+        let val = serde_json::to_value(&self.result.typed_data).map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
+        json_to_python(py, &val)
     }
 
     fn as_text(&self) -> String {
@@ -745,7 +754,7 @@ fn python_to_json(value: Py<PyAny>) -> PyResult<serde_json::Value> {
             Ok(serde_json::Value::Object(map?.into_iter().collect()))
         } else {
             // Fallback: try to convert to string
-            let s = value.str(py)?.to_string();
+            let s = value.as_ref(py).str()?.to_string();
             Ok(serde_json::Value::String(s))
         }
     })
