@@ -1,10 +1,10 @@
 from .formora import (
-    Form,
-    Rule,
-    Condition,
+    PyForm as Form,
+    PyRule as Rule,
+    PyCondition as Condition,
     CssFramework,
-    CssProfile,
-    FormResult,
+    PyCssProfile as CssProfile,
+    PyFormResult as FormResult,
     parse_message as parse,
     is_formora as is_formora_message,
 )

@@ -28,7 +28,7 @@ classifiers = [
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
-python-source = "formora"
+python-source = "."
 
 [project.optional-dependencies]
 llm = []
