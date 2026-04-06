@@ -76,6 +76,12 @@ impl Form {
         formora_core::renderer::render(&self.schema)
     }
 
+    /// Return the form schema as a JSON string (used by llm.ts for introspection)
+    #[wasm_bindgen(js_name = schemaJson)]
+    pub fn schema_json(&self) -> String {
+        serde_json::to_string(&self.schema).unwrap_or_else(|_| "{}".to_string())
+    }
+
     // ── Field methods ─────────────────────────────────────────────────────────
 
     /// Add a single-line text input
