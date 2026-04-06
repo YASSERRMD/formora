@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>Formora</AssemblyName>
+    <RootNamespace>Formora</RootNamespace>
+    <Version>0.1.0</Version>
+    <Description>C# bindings for the formora form rendering engine</Description>
+  </PropertyGroup>
+</Project>

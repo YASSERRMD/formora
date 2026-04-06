@@ -71,6 +71,35 @@ jobs:
           LD_LIBRARY_PATH: "${{ github.workspace }}/formora-c/target/release"
         run: go vet ./formora/...
 
+  build-csharp:
+    name: Build C# bindings
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-c2-${{ hashFiles('**/Cargo.lock') }}
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build formora-c shared library
+        working-directory: formora-c
+        run: cargo build --release
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Build Formora library
+        working-directory: formora-cs/src/Formora
+        run: dotnet build -c Release
+      - name: Build examples
+        working-directory: formora-cs
+        run: |
+          dotnet build examples/SimpleForm/SimpleForm.csproj -c Release
+          dotnet build examples/MultistepForm/MultistepForm.csproj -c Release
+          dotnet build examples/ConditionalForm/ConditionalForm.csproj -c Release
+
   build-wasm:
     name: Build WASM / TypeScript package
     runs-on: ubuntu-latest
