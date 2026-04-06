@@ -1,238 +1,305 @@
 # Formora
 
-Interactive form widgets for chat applications powered by Rust and Python.
+> Interactive form widgets for chat and LLM applications — powered by a high-performance Rust core with first-class bindings for **Python**, **TypeScript/WASM**, **Go**, and **C#**.
+
+---
+
+## What is Formora?
+
+Formora generates rich, interactive HTML forms that integrate seamlessly into chat UIs and LLM pipelines. Write your form once, render it in any language, parse submissions back to strongly-typed data.
+
+```
+┌─────────────────────────────┐
+│        formora-core         │  ← Rust engine (rendering, parsing, validation)
+└───────────────┬─────────────┘
+                │
+    ┌───────────┼───────────────────┐
+    │           │                   │
+  PyO3       wasm-bindgen      C FFI (cdylib)
+    │           │                   │
+┌───┴───┐  ┌───┴───┐    ┌──────────┴──────────┐
+│  py   │  │  js   │    │   formora-c          │
+└───────┘  └───────┘    └──────┬───────────────┘
+                               │
+                     ┌─────────┴─────────┐
+                     │                   │
+                   cgo               P/Invoke
+                     │                   │
+                  ┌──┴──┐           ┌───┴───┐
+                  │ go  │           │  cs   │
+                  └─────┘           └───────┘
+```
+
+---
 
 ## Features
 
-- **CSS Framework Agnostic**: Built-in support for Bootstrap 5, Tailwind CSS v3, and custom CSS
-- **Rich Field Types**: Text, Email, Number, Textarea, Select, Multi-Select, Checkbox, Radio, Date, Range, File, Hidden
-- **Validation**: Client-side validation with custom rules and error messages
-- **Conditional Logic**: Show/hide fields based on other field values
-- **Multi-step Forms**: Progress tracking and step-by-step navigation
-- **LLM Integration**: JSON Schema generation and form result formatting
-- **Framework Adapters**: Ready-to-use JavaScript snippets for Open WebUI, Chainlit, Gradio, and generic chat UIs
+| Feature | Description |
+|---------|-------------|
+| **12 Field Types** | Text, Email, Number, Textarea, Select, Multi-Select, Checkbox, Radio, Date, Range, File, Hidden |
+| **CSS Framework Agnostic** | Built-in Bootstrap 5, Tailwind CSS v3, and custom profiles |
+| **Client-side Validation** | Required, min/max length, numeric bounds, regex, email format |
+| **Conditional Logic** | Show/hide fields based on other field values (eq, neq, contains, gt, lt, in_list) |
+| **Multi-step Forms** | Progress tracking and step-by-step navigation |
+| **LLM Integration** | JSON Schema generation, type-validated args extraction, prompt formatting |
+| **Framework Adapters** | Open WebUI, Chainlit, Gradio, generic chat UIs (Python) |
 
-## Installation
+---
+
+## Language Bindings
+
+| Package | Language | Mechanism | Status |
+|---------|----------|-----------|--------|
+| [`formora-py`](formora-py) | Python 3.9+ | PyO3 native extension | ✅ |
+| [`formora-js`](formora-js) | TypeScript / Node.js / Browser | wasm-bindgen + wasm-pack | ✅ |
+| [`formora-go`](formora-go) | Go 1.21+ | cgo → formora-c | ✅ |
+| [`formora-cs`](formora-cs) | C# / .NET 8+ | P/Invoke → formora-c | ✅ |
+| [`formora-c`](formora-c) | C / any C-ABI language | cdylib + `formora.h` | ✅ |
+
+---
+
+## Quick Start by Language
+
+### Python
 
 ```bash
 pip install formora
 ```
 
-## Quick Start
-
 ```python
-from formora import Form, CssFramework
+from formora import Form, Rule, CssFramework
 
-# Create a simple form
-html = Form("signup") \
-    .title("Sign Up") \
-    .css(CssFramework.BOOTSTRAP) \
-    .text("name", "Full Name", required=True) \
-    .email("email", "Email Address", required=True) \
-    .submit_label("Create Account") \
-    .build()
+html = (Form("contact")
+    .title("Contact Us")
+    .css(CssFramework.bootstrap())
+    .text("name", "Full Name", required=True,
+          rules=[Rule.required(), Rule.min_length(2)])
+    .email("email", "Email Address", required=True,
+           rules=[Rule.required(), Rule.email()])
+    .submit_label("Send")
+    .build())
 ```
 
-## CSS Frameworks
+### TypeScript / JavaScript
 
-### Bootstrap (Default)
-
-```python
-from formora import Form, CssFramework
-
-html = Form("contact").css(CssFramework.BOOTSTRAP).text("name", "Name").build()
+```bash
+# Build the WASM package first
+cd formora-js && wasm-pack build --target bundler --out-dir wasm --out-name formora_js
 ```
 
-### Tailwind
+```typescript
+import init, { Form, Rule, CssFramework } from "./wasm/formora_js";
 
-```python
-from formora import Form, CssFramework
+await init();
 
-html = Form("contact").css(CssFramework.TAILWIND).text("name", "Name").build()
+const html = new Form("contact")
+    .title("Contact Us")
+    .css(CssFramework.bootstrap())
+    .text("name", "Full Name", undefined, true, undefined, undefined,
+          [Rule.required(), Rule.minLength(2)])
+    .email("email", "Email Address", true, undefined, undefined,
+           [Rule.required(), Rule.email()])
+    .submitLabel("Send")
+    .build();
 ```
 
-### Custom Profile
+### Go
 
-```python
-from formora import Form, CssProfile
-
-profile = CssProfile(CssFramework.CUSTOM).override_(
-    form_wrapper="my-form",
-    input_text="my-input",
-    button_submit="my-btn"
-)
-
-html = Form("contact").css(profile).text("name", "Name").build()
+```bash
+cd formora-go && ./build.sh
+export DYLD_LIBRARY_PATH="$PWD/../formora-c/target/release:$DYLD_LIBRARY_PATH"  # macOS
 ```
+
+```go
+import "github.com/YASSERRMD/formora/go/formora"
+
+form := formora.NewForm("")
+defer form.Free()
+
+html := form.
+    Title("Contact Us").
+    CSSFramework(formora.Bootstrap()).
+    Text(formora.TextField{ID: "name", Label: "Full Name", Required: true}).
+    Email(formora.EmailField{ID: "email", Label: "Email", Required: true}).
+    SubmitLabel("Send").
+    Build()
+```
+
+### C# / .NET
+
+```bash
+cd formora-cs && ./build.sh
+export LD_LIBRARY_PATH="$PWD/../formora-c/target/release:$LD_LIBRARY_PATH"  # Linux
+```
+
+```csharp
+using Formora;
+
+using var form = new Form("contact");
+var html = form
+    .Title("Contact Us")
+    .Css(CssFramework.Bootstrap())
+    .Text("name", "Full Name", required: true, rules: [Rule.Required()])
+    .Email("email", "Email Address", required: true, rules: [Rule.Required(), Rule.Email()])
+    .SubmitLabel("Send")
+    .Build();
+```
+
+---
 
 ## Field Types
 
-```python
-from formora import Form, Rule
+All bindings support the same 12 field types:
 
-form = Form("survey")
+| Field | Description |
+|-------|-------------|
+| `text` | Single-line text input |
+| `email` | Email address input |
+| `number` | Numeric input with optional min/max |
+| `textarea` | Multi-line text area |
+| `select` | Single-value dropdown |
+| `multi_select` | Multi-value selector with tags |
+| `checkbox` | Boolean toggle |
+| `radio` | Radio button group |
+| `date` | Date picker |
+| `range` | Slider with min/max/step |
+| `file` | File upload with MIME type filter |
+| `hidden` | Context field (not shown to user) |
 
-# Text field
-form.text("name", "Full Name", required=True, rules=[Rule.min_length(2)])
+---
 
-# Email with validation
-form.email("email", "Email", required=True, rules=[Rule.required(), Rule.email()])
+## Validation Rules
 
-# Number with range
-form.number("age", "Age", min=0, max=120)
+| Rule | Description |
+|------|-------------|
+| `required` | Field must have a value |
+| `min_length(n)` | String must be at least n characters |
+| `max_length(n)` | String must be at most n characters |
+| `min(n)` | Numeric value ≥ n |
+| `max(n)` | Numeric value ≤ n |
+| `regex(pattern)` | Value must match pattern |
+| `email` | Must be a valid email format |
 
-# Textarea
-form.textarea("bio", "About You", rows=5)
+---
 
-# Select dropdown
-form.select("country", "Country", options=[("United States", "us"), ("Canada", "ca")])
+## Parsing Submissions
 
-# Multi-select
-form.multi_select("interests", "Interests", options=[("Tech", "tech"), ("Sports", "sports")])
+Forms emit `__formora__{...}` messages when submitted. Parse them in any language:
 
-# Checkbox
-form.checkbox("agree", "I agree to the terms", default=True)
-
-# Radio buttons
-form.radio("plan", "Plan", options=[("Free", "free"), ("Pro", "pro")])
-
-# Date picker
-form.date("birthdate", "Birth Date")
-
-# Range slider
-form.range("satisfaction", "Satisfaction", min=1, max=10, step=1)
-
-# File upload
-form.file("resume", "Resume", accept=[".pdf", ".docx"])
-
-# Hidden field
-form.hidden("source", "newsletter")
-```
-
-## Validation
-
-```python
-from formora import Rule
-
-# Required field
-Rule.required(message="This field is required")
-
-# String length
-Rule.min_length(10, message="Too short")
-Rule.max_length(100, message="Too long")
-
-# Numeric range
-Rule.min(18, message="Must be 18 or older")
-Rule.max(100, message="Must be 100 or less")
-
-# Regular expression
-Rule.regex(r"^\d{3}-\d{3}-\d{4}$", message="Invalid phone format")
-
-# Email validation
-Rule.email(message="Please enter a valid email")
-```
-
-## Conditional Fields
-
-```python
-from formora import Form, Condition
-
-form = Form("registration")
-
-form.text("role", "Role", options=[("Developer", "dev"), ("Manager", "mgr")])
-
-# Show this field only if role is "Manager"
-form.textarea(
-    "manager_note",
-    "Manager Notes",
-    show_if=Condition("role", "eq", "mgr")
-)
-
-# Show this field if role is NOT empty
-form.number(
-    "team_size",
-    "Team Size",
-    show_if=Condition("role", "neq", "")
-)
-```
-
-## Multi-step Forms
-
-```python
-from formora import Form, CssFramework
-
-form = Form("onboarding").css(CssFramework.TAILWIND)
-
-# Step 1
-form.step("Basic Info")
-form.text("name", "Name", required=True)
-form.email("email", "Email", required=True)
-
-# Step 2
-form.step("Your Role")
-form.select("role", "Role", options=[("Dev", "dev"), ("Designer", "design")])
-form.textarea("bio", "Bio")
-
-# Step 3
-form.step("Finish")
-form.checkbox("newsletter", "Subscribe to newsletter")
-
-html = form.build()
-```
-
-## Parsing Form Data
-
+**Python**
 ```python
 from formora import parse, is_formora_message
 
-# Check if incoming message is a formora message
-if is_formora_message(incoming_message):
-    result = parse(incoming_message)
-
-    print(result.form_id)       # "onboarding"
-    print(result.typed_data)     # {"name": "John", "email": "john@example.com", ...}
-    print(result.as_text())      # "name: John, email: john@example.com, ..."
+if is_formora_message(msg):
+    result = parse(msg)
+    print(result.typed_data)
 ```
+
+**TypeScript**
+```typescript
+import { parseMessage, isFormora } from "./wasm/formora_js";
+
+if (isFormora(msg)) {
+    const result = parseMessage(msg)!;
+    console.log(result.typedData);
+}
+```
+
+**Go**
+```go
+if formora.IsFormora(msg) {
+    result := formora.ParseMessage(msg)
+    defer result.Free()
+    fmt.Println(result.TypedData())
+}
+```
+
+**C#**
+```csharp
+if (FormoraParser.IsFormora(msg)) {
+    using var result = FormoraParser.ParseMessage(msg)!;
+    Console.WriteLine(result.AsText());
+}
+```
+
+---
 
 ## LLM Integration
 
-```python
-from formora import Form
-from formora.llm import form_to_json_schema, form_result_to_tool_args, form_result_to_prompt
+All bindings expose three LLM utilities:
 
-form = Form("user_info").text("name", "Name").email("email", "Email")
+| Function | Description |
+|----------|-------------|
+| `form_to_json_schema(form)` | Convert form to JSON Schema for tool calling |
+| `form_result_to_tool_args(result, form)` | Extract typed, validated args from a submission |
+| `form_result_to_prompt(result)` | Format result as a human-readable prompt string |
 
-# Generate JSON Schema for LLM tool calling
-schema = form_to_json_schema(form)
-# {
-#     "type": "object",
-#     "properties": {
-#         "name": {"type": "string"},
-#         "email": {"type": "string"}
-#     },
-#     "required": ["name", "email"]
-# }
+---
 
-# Parse result and get validated tool args
-result = parse(incoming_message)
-tool_args = form_result_to_tool_args(result, form)
+## Repository Structure
 
-# Format as human-readable text
-prompt = form_result_to_prompt(result)
-# "The user has provided the following information: name: John, email: john@example.com"
+```
+formora/
+├── formora-core/       # Rust library — rendering, parsing, validation engine
+├── formora-py/         # Python bindings (PyO3 + Maturin)
+├── formora-js/         # TypeScript/WASM bindings (wasm-bindgen + wasm-pack)
+├── formora-c/          # C-compatible shared library (cdylib) + formora.h header
+├── formora-go/         # Go bindings (cgo)
+├── formora-cs/         # C# / .NET bindings (P/Invoke)
+└── examples/           # Python examples
 ```
 
-## Chat Adapters
+---
 
-Formora includes JavaScript adapters for popular chat frameworks:
+## Building from Source
 
-- **Generic**: Works with any chat UI
-- **Open WebUI**: Integrates with Open WebUI
-- **Chainlit**: Works with Chainlit apps
-- **Gradio**: Integrates with Gradio chatbots
+### Core (required for all bindings)
 
-See `formora/adapters/` for implementation details.
+```bash
+cargo build --release -p formora-core
+```
+
+### Python
+```bash
+cd formora-py && maturin develop
+```
+
+### TypeScript / WASM
+```bash
+cd formora-js && wasm-pack build --target bundler --out-dir wasm --out-name formora_js
+```
+
+### C shared library (required for Go and C#)
+```bash
+cd formora-c && cargo build --release
+```
+
+### Go
+```bash
+cd formora-go && ./build.sh && go vet ./formora/...
+```
+
+### C#
+```bash
+cd formora-cs && ./build.sh && dotnet build src/Formora/Formora.csproj
+```
+
+---
+
+## CI / GitHub Actions
+
+The `build.yml` workflow runs on every push and pull request:
+
+| Job | What it builds |
+|-----|----------------|
+| `test-rust` | formora-core unit tests |
+| `build-python` | Python wheel via maturin |
+| `build-go` | formora-c + Go vet |
+| `build-csharp` | formora-c + dotnet build |
+| `build-wasm` | wasm-pack + TypeScript type-check |
+
+---
 
 ## License
 
-MIT License - see LICENSE file for details.
+MIT — see [LICENSE](LICENSE).
