@@ -145,9 +145,9 @@ pub fn render(schema: &FormSchema) -> String {
                 }
             } else {
                 if !button_submit_class.is_empty() {
-                    html.push_str(&format!(r#"<button type="submit" class="{}">{}</button>"#, button_submit_class, escape_html(&schema.submit_label)));
+                    html.push_str(&format!(r#"<button type="button" data-action="submit" class="{}">{}</button>"#, button_submit_class, escape_html(&schema.submit_label)));
                 } else {
-                    html.push_str(&format!(r#"<button type="submit">{}</button>"#, escape_html(&schema.submit_label)));
+                    html.push_str(&format!(r#"<button type="button" data-action="submit">{}</button>"#, escape_html(&schema.submit_label)));
                 }
             }
             
@@ -171,13 +171,13 @@ pub fn render(schema: &FormSchema) -> String {
 
         if !button_class.is_empty() {
             html.push_str(&format!(
-                r#"<button type="submit" class="{}">{}</button>"#,
+                r#"<button type="button" data-action="submit" class="{}">{}</button>"#,
                 button_class,
                 escape_html(&schema.submit_label)
             ));
         } else {
             html.push_str(&format!(
-                r#"<button type="submit">{}</button>"#,
+                r#"<button type="button" data-action="submit">{}</button>"#,
                 escape_html(&schema.submit_label)
             ));
         }
@@ -870,7 +870,6 @@ fn render_javascript(schema: &FormSchema) -> String {
     let multi_select_tag_remove_class = &schema.css_profile.multi_select_tag_remove;
     let multi_select_option_class = &schema.css_profile.multi_select_option;
 
-    // Build CSS class assignments as JS code
     let hidden_class_js = if field_hidden_class.is_empty() {
         "null".to_string()
     } else {
@@ -930,22 +929,14 @@ fn render_javascript(schema: &FormSchema) -> String {
     if (!condition) return true;
     const op = condition.operator;
     const condVal = condition.value;
-
     switch (op) {{
-      case 'eq':
-        return String(fieldValue) === String(condVal);
-      case 'neq':
-        return String(fieldValue) !== String(condVal);
-      case 'contains':
-        return String(fieldValue).includes(String(condVal));
-      case 'gt':
-        return parseFloat(fieldValue) > parseFloat(condVal);
-      case 'lt':
-        return parseFloat(fieldValue) < parseFloat(condVal);
-      case 'in_list':
-        return Array.isArray(condVal) && condVal.includes(fieldValue);
-      default:
-        return true;
+      case 'eq':        return String(fieldValue) === String(condVal);
+      case 'neq':       return String(fieldValue) !== String(condVal);
+      case 'contains':  return String(fieldValue).includes(String(condVal));
+      case 'gt':        return parseFloat(fieldValue) > parseFloat(condVal);
+      case 'lt':        return parseFloat(fieldValue) < parseFloat(condVal);
+      case 'in_list':   return Array.isArray(condVal) && condVal.includes(fieldValue);
+      default:          return true;
     }}
   }}
 
@@ -953,43 +944,29 @@ fn render_javascript(schema: &FormSchema) -> String {
   function updateFieldVisibility() {{
     const widget = getWidget();
     if (!widget) return;
-
     const fields = widget.querySelectorAll('[data-field-id]');
     fields.forEach(function(fieldGroup) {{
       const conditionAttr = fieldGroup.getAttribute('data-condition');
       if (!conditionAttr) return;
-
       try {{
         const condition = JSON.parse(conditionAttr);
         const referencedField = widget.querySelector('[name="' + condition.field_id + '"]');
         if (!referencedField) return;
-
-        let fieldValue = referencedField.value;
-        if (referencedField.type === 'checkbox') {{
-          fieldValue = referencedField.checked;
-        }}
-
+        let fieldValue = referencedField.type === 'checkbox' ? referencedField.checked : referencedField.value;
         const isVisible = evaluateCondition(condition, fieldValue);
-
         if (isVisible) {{
           fieldGroup.style.display = '';
           if (hiddenClass) fieldGroup.classList.remove(hiddenClass);
         }} else {{
           fieldGroup.style.display = 'none';
           if (hiddenClass) fieldGroup.classList.add(hiddenClass);
-          // Clear value when hidden
           const input = fieldGroup.querySelector('[name]');
           if (input) {{
-            if (input.type === 'checkbox') {{
-              input.checked = false;
-            }} else {{
-              input.value = '';
-            }}
+            if (input.type === 'checkbox') input.checked = false;
+            else input.value = '';
           }}
         }}
-      }} catch (e) {{
-        console.error('Error evaluating condition:', e);
-      }}
+      }} catch (e) {{ console.error('formora condition error:', e); }}
     }});
   }}
 
@@ -997,130 +974,86 @@ fn render_javascript(schema: &FormSchema) -> String {
   function validateField(field) {{
     const rulesAttr = field.getAttribute('data-rules');
     if (!rulesAttr) return true;
-
     try {{
       const rules = JSON.parse(rulesAttr);
       const value = field.value;
       const fieldGroup = field.closest('[data-field-id]');
       const errorDiv = fieldGroup ? fieldGroup.querySelector('[id$="-error"]') : null;
-
       for (const rule of rules) {{
         if (!evaluateRule(rule, value)) {{
-          if (errorDiv) {{
-            errorDiv.textContent = rule.message || getDefaultMessage(rule);
-            errorDiv.style.display = '';
-          }}
+          if (errorDiv) {{ errorDiv.textContent = rule.message || getDefaultMessage(rule); errorDiv.style.display = ''; }}
           if (errorClass) field.classList.add(errorClass);
           return false;
         }}
       }}
-
       if (errorDiv) errorDiv.style.display = 'none';
       if (errorClass) field.classList.remove(errorClass);
       return true;
-    }} catch (e) {{
-      console.error('Error validating field:', e);
-      return true;
-    }}
+    }} catch (e) {{ console.error('formora validation error:', e); return true; }}
   }}
 
   // Evaluate a validation rule
   function evaluateRule(rule, value) {{
     switch (rule.rule_type) {{
-      case 'required':
-        return value && value !== '' && value !== '[]';
-      case 'min_length':
-        return value.length >= rule.value;
-      case 'max_length':
-        return value.length <= rule.value;
-      case 'min':
-        return parseFloat(value) >= parseFloat(rule.value);
-      case 'max':
-        return parseFloat(value) <= parseFloat(rule.value);
-      case 'regex':
-        return new RegExp(rule.value).test(value);
-      case 'email':
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-      default:
-        return true;
+      case 'required':    return value && value !== '' && value !== '[]';
+      case 'min_length':  return value.length >= rule.value;
+      case 'max_length':  return value.length <= rule.value;
+      case 'min':         return parseFloat(value) >= parseFloat(rule.value);
+      case 'max':         return parseFloat(value) <= parseFloat(rule.value);
+      case 'regex':       return new RegExp(rule.value).test(value);
+      case 'email':       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+      default:            return true;
     }}
   }}
 
   // Get default error message for rule
   function getDefaultMessage(rule) {{
     switch (rule.rule_type) {{
-      case 'required': return 'This field is required';
-      case 'min_length': return 'Minimum ' + rule.value + ' characters required';
-      case 'max_length': return 'Maximum ' + rule.value + ' characters allowed';
-      case 'min': return 'Value must be at least ' + rule.value;
-      case 'max': return 'Value must be at most ' + rule.value;
-      case 'regex': return 'Invalid format';
-      case 'email': return 'Please enter a valid email address';
-      default: return 'Invalid value';
+      case 'required':    return 'This field is required';
+      case 'min_length':  return 'Minimum ' + rule.value + ' characters required';
+      case 'max_length':  return 'Maximum ' + rule.value + ' characters allowed';
+      case 'min':         return 'Value must be at least ' + rule.value;
+      case 'max':         return 'Value must be at most ' + rule.value;
+      case 'regex':       return 'Invalid format';
+      case 'email':       return 'Please enter a valid email address';
+      default:            return 'Invalid value';
     }}
   }}
 
   // Validate current step
   function validateCurrentStep() {{
     if (!isMultiStep) return true;
-
     const widget = getWidget();
     const stepDiv = widget.querySelector('[data-step="' + currentStep + '"]');
     if (!stepDiv) return true;
-
     const fields = stepDiv.querySelectorAll('input:not([type="hidden"]), select, textarea');
     let isValid = true;
     let firstError = null;
-
     fields.forEach(function(field) {{
       const fieldGroup = field.closest('[data-field-id]');
       if (fieldGroup && fieldGroup.style.display === 'none') return;
-
-      if (!validateField(field)) {{
-        isValid = false;
-        if (!firstError) firstError = field;
-      }}
+      if (!validateField(field)) {{ isValid = false; if (!firstError) firstError = field; }}
     }});
-
-    if (!isValid && firstError) {{
-      firstError.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
-      firstError.focus();
-    }}
-
+    if (!isValid && firstError) {{ firstError.scrollIntoView({{ behavior: 'smooth', block: 'center' }}); firstError.focus(); }}
     return isValid;
   }}
 
   // Update progress bar
   function updateProgress() {{
     if (!isMultiStep) return;
-
     const widget = getWidget();
-    const progressBar = widget.getElementById(formId + '-progress');
-    const progressLabel = widget.querySelector('.progress-bar-label');
-
-    if (progressBar) {{
-      const percent = ((currentStep + 1) / stepsCount) * 100;
-      progressBar.style.width = percent + '%';
-    }}
-
-    if (progressLabel) {{
-      progressLabel.textContent = 'Step ' + (currentStep + 1) + ' of ' + stepsCount;
-    }}
+    const progressBar = document.getElementById(formId + '-progress');
+    const labelEl = widget.querySelector('[class*="progress"][class*="label"], [id*="progress-label"]');
+    if (progressBar) progressBar.style.width = (((currentStep + 1) / stepsCount) * 100) + '%';
+    if (labelEl) labelEl.textContent = 'Step ' + (currentStep + 1) + ' of ' + stepsCount;
   }}
 
   // Show step
   function showStep(stepIndex) {{
     const widget = getWidget();
-    const steps = widget.querySelectorAll('[data-step]');
-
-    steps.forEach(function(step, index) {{
-      if (index === stepIndex) {{
-        step.style.display = '';
-      }} else {{
-        step.style.display = 'none';
-      }}
+    widget.querySelectorAll('[data-step]').forEach(function(step, index) {{
+      step.style.display = index === stepIndex ? '' : 'none';
     }});
-
     currentStep = stepIndex;
     updateProgress();
   }}
@@ -1128,98 +1061,143 @@ fn render_javascript(schema: &FormSchema) -> String {
   // Multi-select widget initialization
   function initMultiSelect() {{
     const widget = getWidget();
-    const multiSelects = widget.querySelectorAll('[id$="-container"]');
-
-    multiSelects.forEach(function(container) {{
+    widget.querySelectorAll('[id$="-container"]').forEach(function(container) {{
       const fieldId = container.id.replace('-container', '');
       const hiddenInput = document.getElementById(fieldId);
       const dropdown = document.getElementById(fieldId + '-dropdown');
       const searchInput = document.getElementById(fieldId + '-search');
-
+      if (!hiddenInput || !dropdown || !searchInput) return;
       let selectedValues = [];
 
-      // Render tags
       function renderTags() {{
-        // Clear existing tags
-        const existingTags = container.querySelectorAll(tagClass || '.formora-multi-select-tag');
-        existingTags.forEach(t => t.remove());
-
+        container.querySelectorAll(tagClass ? '.' + tagClass.split(' ')[0] : '.formora-tag').forEach(t => t.remove());
         selectedValues.forEach(function(val) {{
           const option = dropdown.querySelector('[data-value="' + val + '"]');
           const label = option ? option.textContent : val;
-
           const tag = document.createElement('span');
           if (tagClass) tag.className = tagClass;
-          tag.innerHTML = label + '<span class="' + tagRemoveClass + '" data-value="' + val + '">&times;</span>';
+          tag.innerHTML = label + '<span class="' + tagRemoveClass + '" data-value="' + val + '" style="cursor:pointer;margin-left:4px">&times;</span>';
           container.insertBefore(tag, searchInput);
         }});
-
         hiddenInput.value = JSON.stringify(selectedValues);
       }}
 
-      // Show dropdown
-      searchInput.addEventListener('focus', function() {{
-        dropdown.style.display = '';
-      }});
-
-      // Filter options
+      searchInput.addEventListener('focus', function() {{ dropdown.style.display = ''; }});
       searchInput.addEventListener('input', function() {{
-        const query = this.value.toLowerCase();
-        const options = dropdown.querySelectorAll(optionClass || '.formora-multi-select-option');
-        options.forEach(function(opt) {{
-          const text = opt.textContent.toLowerCase();
-          opt.style.display = text.includes(query) ? '' : 'none';
+        const q = this.value.toLowerCase();
+        dropdown.querySelectorAll(optionClass ? '.' + optionClass.split(' ')[0] : '[data-value]').forEach(function(opt) {{
+          opt.style.display = opt.textContent.toLowerCase().includes(q) ? '' : 'none';
         }});
       }});
-
-      // Select option
       dropdown.addEventListener('click', function(e) {{
-        const option = e.target.closest(optionClass || '.formora-multi-select-option');
-        if (!option) return;
-
-        const value = option.getAttribute('data-value');
-        if (!selectedValues.includes(value)) {{
-          selectedValues.push(value);
-          renderTags();
-        }}
+        const opt = e.target.closest('[data-value]');
+        if (!opt) return;
+        const value = opt.getAttribute('data-value');
+        if (!selectedValues.includes(value)) {{ selectedValues.push(value); renderTags(); }}
         searchInput.value = '';
       }});
-
-      // Remove tag
       container.addEventListener('click', function(e) {{
-        if (e.target.classList.contains(tagRemoveClass.replace('.', '') || 'formora-multi-select-remove')) {{
-          const value = e.target.getAttribute('data-value');
+        const btn = e.target.closest('[data-value]');
+        if (btn && btn.tagName !== 'DIV') {{
+          const value = btn.getAttribute('data-value');
           selectedValues = selectedValues.filter(v => v !== value);
           renderTags();
         }}
       }});
-
-      // Hide dropdown on click outside
       document.addEventListener('click', function(e) {{
-        if (!container.contains(e.target)) {{
-          dropdown.style.display = 'none';
-        }}
+        if (!container.contains(e.target) && !dropdown.contains(e.target)) dropdown.style.display = 'none';
       }});
     }});
   }}
 
-  // Serialize and send form data
-  function submitForm(e) {{
-    e.preventDefault();
+  // ── Chat injection — tries every known platform strategy ──────────────────
+  function injectIntoChat(message) {{
+    // Strategy 1: Chainlit programmatic API
+    if (typeof window.sendMessage === 'function') {{
+      window.sendMessage(message);
+      return true;
+    }}
 
-    const form = getForm();
+    // Strategy 2: postMessage to parent (iframe embeddings)
+    if (window.parent && window.parent !== window) {{
+      window.parent.postMessage({{ type: 'formora:submit', raw: message }}, '*');
+    }}
+
+    // Strategy 3: Find chat textarea across known frameworks
+    const textarea =
+      document.querySelector('#chat-input') ||
+      document.querySelector('textarea[data-testid*="chat"]') ||
+      document.querySelector('textarea[placeholder*="message" i]') ||
+      document.querySelector('textarea[placeholder*="type" i]') ||
+      document.querySelector('textarea[placeholder*="ask" i]') ||
+      document.querySelector('.gradio-container textarea') ||
+      document.querySelector('textarea[class*="gradio"]') ||
+      document.querySelector('textarea[class*="chat"]') ||
+      document.querySelector('main textarea') ||
+      document.querySelector('textarea');
+
+    if (!textarea) return false;
+
+    // Use native setter so React/Vue state picks up the change
+    try {{
+      const nativeSetter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set;
+      nativeSetter.call(textarea, message);
+    }} catch (_) {{
+      textarea.value = message;
+    }}
+    textarea.dispatchEvent(new Event('input',  {{ bubbles: true }}));
+    textarea.dispatchEvent(new Event('change', {{ bubbles: true }}));
+    textarea.focus();
+
+    // Strategy 4: Click the send button
+    const sendBtn =
+      document.querySelector('button[aria-label*="send" i]') ||
+      document.querySelector('button[aria-label*="submit" i]') ||
+      document.querySelector('#send-message-button') ||
+      document.querySelector('button[data-testid*="send"]') ||
+      document.querySelector('button svg[class*="send"]')?.closest('button') ||
+      document.querySelector('button[class*="send"]') ||
+      document.querySelector('button[class*="submit"]') ||
+      document.querySelector('button.primary') ||
+      document.querySelector('footer button:last-of-type') ||
+      document.querySelector('form button[type="submit"]');
+
+    if (sendBtn && !sendBtn.disabled) {{
+      sendBtn.click();
+      return true;
+    }}
+
+    // Strategy 5: Synthesize Enter key (Chainlit fallback, generic)
+    textarea.dispatchEvent(new KeyboardEvent('keydown', {{
+      key: 'Enter', code: 'Enter', keyCode: 13, which: 13,
+      bubbles: true, cancelable: true
+    }}));
+    textarea.dispatchEvent(new KeyboardEvent('keypress', {{
+      key: 'Enter', code: 'Enter', keyCode: 13, which: 13,
+      bubbles: true, cancelable: true
+    }}));
+    textarea.dispatchEvent(new KeyboardEvent('keyup', {{
+      key: 'Enter', code: 'Enter', keyCode: 13, which: 13,
+      bubbles: true
+    }}));
+
+    return true;
+  }}
+
+  // ── Submit handler ────────────────────────────────────────────────────────
+  function submitForm(btn) {{
+    const form   = getForm();
     const widget = getWidget();
     if (!form || !widget) return;
 
-    // Validate all fields
-    const fields = form.querySelectorAll('[name]');
-    let isValid = true;
+    // Validate all visible fields
+    const allFields = form.querySelectorAll('[name]');
+    let isValid    = true;
     let firstError = null;
 
-    fields.forEach(function(field) {{
+    allFields.forEach(function(field) {{
       const fieldGroup = field.closest('[data-field-id]');
       if (fieldGroup && fieldGroup.style.display === 'none') return;
-
       if (field.type !== 'hidden' && !validateField(field)) {{
         isValid = false;
         if (!firstError) firstError = field;
@@ -1227,104 +1205,114 @@ fn render_javascript(schema: &FormSchema) -> String {
     }});
 
     if (!isValid) {{
-      if (firstError) {{
-        firstError.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
-        firstError.focus();
-      }}
+      if (firstError) {{ firstError.scrollIntoView({{ behavior: 'smooth', block: 'center' }}); firstError.focus(); }}
       return;
     }}
 
-    // Collect data
+    // Collect data (skip hidden fields from view)
     const data = {{}};
-    fields.forEach(function(field) {{
+    allFields.forEach(function(field) {{
       const fieldGroup = field.closest('[data-field-id]');
       if (fieldGroup && fieldGroup.style.display === 'none') return;
-
-      const name = field.name;
       let value = field.value;
-
       if (field.type === 'checkbox') {{
         value = field.checked;
       }} else if (field.type === 'number' || field.type === 'range') {{
         value = parseFloat(value) || 0;
       }} else if (field.type === 'hidden') {{
-        try {{
-          value = JSON.parse(value);
-        }} catch (e) {{
-          // Keep as string
-        }}
+        try {{ value = JSON.parse(value); }} catch (_) {{}}
       }}
-
-      data[name] = value;
+      data[field.name] = value;
     }});
 
-    // Build result
-    const result = {{
-      form_id: formId,
-      data: data
-    }};
+    const message = '__formora__' + JSON.stringify({{ form_id: formId, data: data }});
 
-    // Serialize
-    const message = '__formora__' + JSON.stringify(result);
+    // ── Sending state on button ─────────────────────────────────────────────
+    const originalLabel = btn ? btn.innerHTML : '';
+    const originalDisabled = btn ? btn.disabled : false;
+    if (btn) {{
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+      btn.style.cursor  = 'not-allowed';
+      btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px">'
+        + '<svg style="animation:formora-spin 1s linear infinite;width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>'
+        + 'Sending\u2026</span>';
+    }}
 
-    // Dispatch event
+    // Dispatch event for external listeners (adapters, custom code)
     window.dispatchEvent(new CustomEvent('formora:submit', {{
-      detail: {{
-        raw: message,
-        parsed: data
-      }}
+      detail: {{ raw: message, parsed: data, form_id: formId }}
     }}));
 
-    // Hide form, show success
-    form.style.display = 'none';
-    const successDiv = document.getElementById(formId + '-success');
-    if (successDiv) {{
-      successDiv.style.display = '';
-    }}
+    // Inject into chat
+    const injected = injectIntoChat(message);
+
+    // Show success after a short delay to let the chat register the message
+    setTimeout(function() {{
+      form.style.display = 'none';
+      const successDiv = document.getElementById(formId + '-success');
+      if (successDiv) successDiv.style.display = '';
+
+      // Restore button in case caller reuses the widget
+      if (btn) {{
+        btn.disabled  = originalDisabled;
+        btn.style.opacity = '';
+        btn.style.cursor  = '';
+        btn.innerHTML = originalLabel;
+      }}
+    }}, injected ? 400 : 0);
   }}
 
   // Initialize on DOM ready
   function init() {{
-    const form = getForm();
+    const form   = getForm();
     const widget = getWidget();
     if (!form || !widget) return;
 
-    // Set up visibility updates on input changes
-    widget.addEventListener('change', updateFieldVisibility);
-    widget.addEventListener('input', updateFieldVisibility);
+    // Inject spinner keyframe once per page
+    if (!document.getElementById('formora-spin-style')) {{
+      const style = document.createElement('style');
+      style.id = 'formora-spin-style';
+      style.textContent = '@keyframes formora-spin{{from{{transform:rotate(0deg)}}to{{transform:rotate(360deg)}}}}';
+      document.head.appendChild(style);
+    }}
 
-    // Initial visibility check
+    // Prevent any native form submission that may still slip through
+    form.addEventListener('submit', function(e) {{ e.preventDefault(); }});
+
+    // Visibility updates
+    widget.addEventListener('change', updateFieldVisibility);
+    widget.addEventListener('input',  updateFieldVisibility);
     updateFieldVisibility();
 
     // Multi-select widget
     initMultiSelect();
 
-    // Form submission
-    form.addEventListener('submit', submitForm);
-
-    // Multi-step navigation
-    if (isMultiStep) {{
-      widget.addEventListener('click', function(e) {{
-        const action = e.target.getAttribute('data-action');
-        if (!action) return;
-
+    // Submit button click (data-action="submit")
+    widget.addEventListener('click', function(e) {{
+      const btn = e.target.closest('[data-action="submit"]');
+      if (btn) {{
         e.preventDefault();
+        submitForm(btn);
+        return;
+      }}
 
-        if (action === 'next') {{
-          if (validateCurrentStep()) {{
-            showStep(currentStep + 1);
-          }}
-        }} else if (action === 'prev') {{
-          showStep(currentStep - 1);
-        }}
-      }});
+      // Multi-step navigation
+      const action = e.target.closest('[data-action]');
+      if (!action) return;
+      const act = action.getAttribute('data-action');
+      if (act === 'next') {{
+        e.preventDefault();
+        if (validateCurrentStep()) showStep(currentStep + 1);
+      }} else if (act === 'prev') {{
+        e.preventDefault();
+        showStep(currentStep - 1);
+      }}
+    }});
 
-      // Show first step
-      showStep(0);
-    }}
+    if (isMultiStep) showStep(0);
   }}
 
-  // Run initialization
   if (document.readyState === 'loading') {{
     document.addEventListener('DOMContentLoaded', init);
   }} else {{
