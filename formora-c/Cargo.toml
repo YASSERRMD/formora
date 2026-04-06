@@ -1,0 +1,21 @@
+[package]
+name = "formora-c"
+version = "0.1.0"
+edition = "2021"
+description = "C-compatible FFI bindings for formora — used by Go and C# wrappers"
+license = "MIT"
+
+[lib]
+name = "formora_c"
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+serde_json = "1.0"
+formora-core = { path = "../formora-core" }
+uuid = { version = "1.0", features = ["v4"] }
+libc = "0.2"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
