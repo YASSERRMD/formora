@@ -45,6 +45,32 @@ jobs:
         working-directory: formora-py
         run: maturin build --release
 
+  build-go:
+    name: Build Go bindings
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-c-${{ hashFiles('**/Cargo.lock') }}
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build formora-c shared library
+        working-directory: formora-c
+        run: cargo build --release
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+      - name: Vet Go package
+        working-directory: formora-go
+        env:
+          CGO_LDFLAGS: "-L${{ github.workspace }}/formora-c/target/release"
+          LD_LIBRARY_PATH: "${{ github.workspace }}/formora-c/target/release"
+        run: go vet ./formora/...
+
   build-wasm:
     name: Build WASM / TypeScript package
     runs-on: ubuntu-latest
