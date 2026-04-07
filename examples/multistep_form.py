@@ -4,7 +4,7 @@ Multi-step Form Example
 This example demonstrates a multi-step form with progress tracking.
 """
 
-from formora import Form, CssFramework, Rule
+from barq_chat_form import Form, CssFramework, Rule
 
 html = (
     Form("onboarding")

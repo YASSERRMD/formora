@@ -19,7 +19,7 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - uses: dtolnay/rust-toolchain@stable
       - name: Run tests
-        working-directory: formora-core
+        working-directory: barq-chat-form-core
         run: cargo test --verbose --all-features
 
   test-python:
@@ -41,14 +41,14 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - uses: dtolnay/rust-toolchain@stable
       - name: Build and install
-        working-directory: formora-py
+        working-directory: barq-chat-form-py
         run: pip install -e .
       - name: Run basic import test
-        run: python -c "from formora import Form; print('Import successful')"
+        run: python -c "from barq_chat_form import Form; print('Import successful')"
       - name: Create simple form
         run: |
           python -c "
-          from formora import Form, CssFramework
+          from barq_chat_form import Form, CssFramework
           html = Form('test').css(CssFramework.BOOTSTRAP).text('name', 'Name').build()
           assert 'form' in html.lower()
           print('Basic form creation successful')
