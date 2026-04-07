@@ -3,7 +3,7 @@
  * TypeScript equivalent of examples/conditional_form.py
  */
 
-import init, { Form, Rule, JsCondition as Condition, CssFramework } from "../wasm/formora_js";
+import init, { Form, Rule, JsCondition as Condition, CssFramework } from "../wasm/barq_chat_form_js";
 
 async function main() {
   await init();

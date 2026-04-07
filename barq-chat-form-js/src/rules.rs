@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::*;
 
-use formora_core::{Condition, ValidationRule};
+use barq_chat_form_core::{Condition, ValidationRule};
 
 use crate::helpers::js_to_json;
 

@@ -1,7 +1,7 @@
 {
-  "name": "formora",
+  "name": "barq-chat-form",
   "version": "0.1.0",
-  "description": "TypeScript form rendering engine for interactive chat widgets",
+  "description": "TypeScript chat form rendering engine for interactive chat widgets",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -16,8 +16,8 @@
     "wasm"
   ],
   "scripts": {
-    "build:wasm": "wasm-pack build --target bundler --out-dir wasm --out-name formora_js",
-    "build:wasm:node": "wasm-pack build --target nodejs --out-dir wasm-node --out-name formora_js",
+    "build:wasm": "wasm-pack build --target bundler --out-dir wasm --out-name barq_chat_form_js",
+    "build:wasm:node": "wasm-pack build --target nodejs --out-dir wasm-node --out-name barq_chat_form_js",
     "build:ts": "tsc",
     "build": "npm run build:wasm && npm run build:ts",
     "typecheck": "tsc --noEmit",

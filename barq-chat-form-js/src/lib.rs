@@ -7,4 +7,4 @@ mod result;
 pub use css::{CssFramework, JsCssProfile};
 pub use rules::{Rule, JsCondition};
 pub use form::Form;
-pub use result::{FormResult, parse_message, is_formora};
+pub use result::{FormResult, parse_message, is_barq};

@@ -1,8 +1,8 @@
 [package]
-name = "formora-js"
+name = "barq-chat-form-js"
 version = "0.1.0"
 edition = "2021"
-description = "TypeScript/WASM bindings for formora form rendering engine"
+description = "TypeScript/WASM bindings for barq-chat-form rendering engine"
 license = "MIT"
 
 [lib]
@@ -12,7 +12,7 @@ crate-type = ["cdylib"]
 wasm-bindgen = "0.2"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-formora-core = { path = "../formora-core" }
+barq-chat-form-core = { path = "../barq-chat-form-core" }
 uuid = { version = "1.0", features = ["v4", "js"] }
 js-sys = "0.3"
 wasm-bindgen-futures = "0.4"

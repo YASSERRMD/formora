@@ -2,7 +2,7 @@ use js_sys::{Object, Reflect};
 use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
 
-use formora_core::CssProfile;
+use barq_chat_form_core::CssProfile;
 
 /// CSS framework selector for form styling
 #[wasm_bindgen]

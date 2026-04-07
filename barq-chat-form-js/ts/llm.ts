@@ -1,9 +1,9 @@
 /**
- * LLM integration utilities for formora.
- * Mirrors Python's formora/llm.py.
+ * LLM integration utilities for barq-chat-form.
+ * Mirrors Python's barq-chat-form/llm.py.
  */
 
-import type { Form, FormResult } from "../wasm/formora_js";
+import type { Form, FormResult } from "../wasm/barq_chat_form_js";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -23,10 +23,10 @@ export interface JsonSchema {
 }
 
 /** Thrown when a form result value does not match the expected field type. */
-export class FormoraTypeError extends Error {
+export class BarqTypeError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = "FormoraTypeError";
+    this.name = "BarqTypeError";
   }
 }
 
@@ -128,7 +128,7 @@ function fieldTypeToJsonSchema(field: {
  * Convert a FormResult to a plain object suitable for passing as tool arguments.
  * Validates types against the form schema and strips hidden fields.
  *
- * @throws {FormoraTypeError} if a required field is missing or a type mismatch occurs
+ * @throws {BarqTypeError} if a required field is missing or a type mismatch occurs
  */
 export function formResultToToolArgs(
   result: FormResult,
@@ -160,7 +160,7 @@ export function formResultToToolArgs(
 
     if (!(field.id in typed)) {
       if (field.required) {
-        throw new FormoraTypeError(
+        throw new BarqTypeError(
           `Required field '${field.id}' missing from form result`
         );
       }
@@ -182,7 +182,7 @@ function validateFieldType(
 ): void {
   if (value == null) {
     if (field.required) {
-      throw new FormoraTypeError(`Required field '${fieldId}' is null/undefined`);
+      throw new BarqTypeError(`Required field '${fieldId}' is null/undefined`);
     }
     return;
   }
@@ -191,40 +191,40 @@ function validateFieldType(
 
   if (["Text", "Email", "Textarea", "Date", "Select", "Radio"].includes(field_type)) {
     if (typeof value !== "string") {
-      throw new FormoraTypeError(
+      throw new BarqTypeError(
         `Field '${fieldId}' expected string, got ${typeof value}`
       );
     }
   } else if (["Number", "Range"].includes(field_type)) {
     if (typeof value !== "number") {
-      throw new FormoraTypeError(
+      throw new BarqTypeError(
         `Field '${fieldId}' expected number, got ${typeof value}`
       );
     }
     if (field.min != null && value < field.min) {
-      throw new FormoraTypeError(
+      throw new BarqTypeError(
         `Field '${fieldId}' value ${value} is below minimum ${field.min}`
       );
     }
     if (field.max != null && value > field.max) {
-      throw new FormoraTypeError(
+      throw new BarqTypeError(
         `Field '${fieldId}' value ${value} is above maximum ${field.max}`
       );
     }
   } else if (field_type === "Checkbox") {
     if (typeof value !== "boolean") {
-      throw new FormoraTypeError(
+      throw new BarqTypeError(
         `Field '${fieldId}' expected boolean, got ${typeof value}`
       );
     }
   } else if (field_type === "MultiSelect") {
     if (!Array.isArray(value)) {
-      throw new FormoraTypeError(
+      throw new BarqTypeError(
         `Field '${fieldId}' expected array, got ${typeof value}`
       );
     }
     if (!value.every((item) => typeof item === "string")) {
-      throw new FormoraTypeError(
+      throw new BarqTypeError(
         `Field '${fieldId}' array must contain only strings`
       );
     }
