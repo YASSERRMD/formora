@@ -1,7 +1,7 @@
-using Formora.Native;
+using BarqChatForm.Native;
 using System.Text.Json;
 
-namespace Formora;
+namespace BarqChatForm;
 
 /// <summary>Selects a CSS preset for form styling.</summary>
 public sealed class CssFramework : IDisposable

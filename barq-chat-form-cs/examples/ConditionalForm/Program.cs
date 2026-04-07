@@ -1,6 +1,6 @@
 // Conditional field visibility example.
 // C# equivalent of examples/conditional_form.py
-using Formora;
+using BarqChatForm;
 
 var isVip     = new Condition("ticket_type", "eq", "vip");
 var isStudent = new Condition("ticket_type", "eq", "student");
