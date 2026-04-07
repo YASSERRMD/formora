@@ -4,7 +4,7 @@
 
 ---
 
-## What is Formora?
+## What is Barq Chat Form?
 
 Barq Chat Form generates rich, interactive HTML forms that integrate seamlessly into chat UIs and LLM pipelines. Write your form once, render it in any language, parse submissions back to strongly-typed data.
 
@@ -197,9 +197,9 @@ if is_barq_message(msg):
 
 **TypeScript**
 ```typescript
-import { parseMessage, isBarq Chat Form } from "./wasm/barq_chat_form_js";
+import { parseMessage, isBarq } from "./wasm/barq_chat_form_js";
 
-if (isFormora(msg)) {
+if (isBarq(msg)) {
     const result = parseMessage(msg)!;
     console.log(result.typedData);
 }
@@ -281,7 +281,7 @@ cd barq-chat-form-go && ./build.sh && go vet ./barq/...
 
 ### C#
 ```bash
-cd barq-chat-form-cs && ./build.sh && dotnet build src/Formora/Formora.csproj
+cd barq-chat-form-cs && ./build.sh && dotnet build src/BarqChatForm/BarqChatForm.csproj
 ```
 
 ---
