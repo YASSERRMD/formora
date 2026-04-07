@@ -1,4 +1,4 @@
-package formora
+package barq
 
 // Ptr returns a pointer to a string literal.
 // Convenience helper for optional string parameters.

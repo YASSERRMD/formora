@@ -1,8 +1,8 @@
-# formora-go
+# barq-chat-form-go
 
-Go bindings for **formora** — a high-performance form rendering engine that generates rich, interactive HTML forms for chat and LLM applications.
+Go bindings for **barq-chat-form** — a high-performance form rendering engine that generates rich, interactive HTML forms for chat and LLM applications.
 
-Powered by a Rust core compiled to a native shared library (`formora-c`) and wrapped via **cgo**.
+Powered by a Rust core compiled to a native shared library (`barq-chat-form-c`) and wrapped via **cgo**.
 
 ---
 
@@ -11,7 +11,7 @@ Powered by a Rust core compiled to a native shared library (`formora-c`) and wra
 | Tool | Version |
 |------|---------|
 | Go | 1.21+ |
-| Rust | stable (for building `formora-c`) |
+| Rust | stable (for building `barq-chat-form-c`) |
 | gcc / clang | any (cgo build dependency) |
 
 ---
@@ -21,23 +21,23 @@ Powered by a Rust core compiled to a native shared library (`formora-c`) and wra
 ### 1 — Build the native library
 
 ```bash
-cd formora-go
+cd barq-chat-form-go
 ./build.sh
 ```
 
-This compiles `formora-c` in release mode and places the shared library at
-`../formora-c/target/release/libformora_c.{so,dylib,dll}`.
+This compiles `barq-chat-form-c` in release mode and places the shared library at
+`../barq-chat-form-c/target/release/libbarq-chat-form_c.{so,dylib,dll}`.
 
 ### 2 — Set the library search path
 
 **macOS**
 ```bash
-export DYLD_LIBRARY_PATH="$PWD/../formora-c/target/release:$DYLD_LIBRARY_PATH"
+export DYLD_LIBRARY_PATH="$PWD/../barq-chat-form-c/target/release:$DYLD_LIBRARY_PATH"
 ```
 
 **Linux**
 ```bash
-export LD_LIBRARY_PATH="$PWD/../formora-c/target/release:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$PWD/../barq-chat-form-c/target/release:$LD_LIBRARY_PATH"
 ```
 
 ### 3 — Use in your module
@@ -47,7 +47,7 @@ Add the module path to your `go.mod`, or use a local `replace` directive:
 ```go
 module your-app
 
-require github.com/YASSERRMD/formora/go v0.1.0
+require github.com/YASSERRMD/barq-chat-form/go v0.1.0
 ```
 
 ---
@@ -59,25 +59,25 @@ package main
 
 import (
     "fmt"
-    "github.com/YASSERRMD/formora/go/formora"
+    "github.com/YASSERRMD/barq-chat-form/go/barq-chat-form"
 )
 
 func main() {
-    form := formora.NewForm("")   // auto UUID
+    form := barq-chat-form.NewForm("")   // auto UUID
     defer form.Free()
 
     html := form.
         Title("Contact Us").
-        CSSFramework(formora.Bootstrap()).
-        Text(formora.TextField{
+        CSSFramework(barq-chat-form.Bootstrap()).
+        Text(barq-chat-form.TextField{
             ID: "name", Label: "Your Name",
             Required: true,
-            Rules: []formora.Rule{formora.RuleRequired(nil)},
+            Rules: []barq-chat-form.Rule{barq-chat-form.RuleRequired(nil)},
         }).
-        Email(formora.EmailField{
+        Email(barq-chat-form.EmailField{
             ID: "email", Label: "Email Address",
             Required: true,
-            Rules: []formora.Rule{formora.RuleRequired(nil), formora.RuleEmail(nil)},
+            Rules: []barq-chat-form.Rule{barq-chat-form.RuleRequired(nil), barq-chat-form.RuleEmail(nil)},
         }).
         SubmitLabel("Send").
         Build()
@@ -93,7 +93,7 @@ func main() {
 ### Creating a Form
 
 ```go
-form := formora.NewForm("my-form-id")  // or "" for auto UUID
+form := barq-chat-form.NewForm("my-form-id")  // or "" for auto UUID
 defer form.Free()
 ```
 
@@ -132,21 +132,21 @@ Each method accepts a typed config struct:
 ### Rules
 
 ```go
-formora.RuleRequired(nil)
-formora.RuleMinLength(3, formora.Ptr("Too short"))
-formora.RuleMaxLength(100, nil)
-formora.RuleMin(0, nil)
-formora.RuleMax(100, nil)
-formora.RuleRegex(`^\d{5}$`, formora.Ptr("Must be a 5-digit zip code"))
-formora.RuleEmail(nil)
+barq-chat-form.RuleRequired(nil)
+barq-chat-form.RuleMinLength(3, barq-chat-form.Ptr("Too short"))
+barq-chat-form.RuleMaxLength(100, nil)
+barq-chat-form.RuleMin(0, nil)
+barq-chat-form.RuleMax(100, nil)
+barq-chat-form.RuleRegex(`^\d{5}$`, barq-chat-form.Ptr("Must be a 5-digit zip code"))
+barq-chat-form.RuleEmail(nil)
 ```
 
 ### Conditions (conditional visibility)
 
 ```go
-cond := formora.NewCondition("ticket_type", "eq", "vip")
+cond := barq-chat-form.NewCondition("ticket_type", "eq", "vip")
 
-form.Text(formora.TextField{
+form.Text(barq-chat-form.TextField{
     ID:     "company",
     Label:  "Company Name",
     ShowIf: &cond,
@@ -158,12 +158,12 @@ form.Text(formora.TextField{
 ### CSS Frameworks
 
 ```go
-form.CSSFramework(formora.Bootstrap())
-form.CSSFramework(formora.Tailwind())
-form.CSSFramework(formora.Custom())
+form.CSSFramework(barq-chat-form.Bootstrap())
+form.CSSFramework(barq-chat-form.Tailwind())
+form.CSSFramework(barq-chat-form.Custom())
 
 // Or a custom profile:
-profile := formora.CssProfileFromMap(map[string]string{
+profile := barq-chat-form.CssProfileFromMap(map[string]string{
     "button_submit": "my-btn my-btn-primary",
     "form_wrapper":  "my-form-container",
 })
@@ -173,11 +173,11 @@ form.CSSProfile(profile)
 
 ### Parsing Submissions
 
-Forms emit `__formora__{...}` messages when submitted.
+Forms emit `__barq-chat-form__{...}` messages when submitted.
 
 ```go
-if formora.IsFormora(message) {
-    result := formora.ParseMessage(message)
+if barq-chat-form.IsBarq Chat Form(message) {
+    result := barq-chat-form.ParseMessage(message)
     defer result.Free()
 
     fmt.Println(result.FormID())
@@ -190,13 +190,13 @@ if formora.IsFormora(message) {
 
 ```go
 // Convert form to JSON Schema for tool calling
-schema, _ := formora.FormToJSONSchema(form)
+schema, _ := barq-chat-form.FormToJSONSchema(form)
 
 // Extract typed args from result (validates types)
-args, err := formora.FormResultToToolArgs(result, form)
+args, err := barq-chat-form.FormResultToToolArgs(result, form)
 
 // Format result as a natural-language prompt
-prompt := formora.FormResultToPrompt(result)
+prompt := barq-chat-form.FormResultToPrompt(result)
 ```
 
 ---
@@ -216,10 +216,10 @@ prompt := formora.FormResultToPrompt(result)
 ```go
 form.
     Step("Personal Details").
-    Text(formora.TextField{ID: "name", Label: "Name", Required: true}).
-    Email(formora.EmailField{ID: "email", Label: "Email", Required: true}).
+    Text(barq-chat-form.TextField{ID: "name", Label: "Name", Required: true}).
+    Email(barq-chat-form.EmailField{ID: "email", Label: "Email", Required: true}).
     Step("Preferences").
-    Select(formora.SelectField{ID: "plan", Label: "Plan", Options: []formora.Option{...}})
+    Select(barq-chat-form.SelectField{ID: "plan", Label: "Plan", Options: []barq-chat-form.Option{...}})
 ```
 
 ---
