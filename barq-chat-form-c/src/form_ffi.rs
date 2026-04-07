@@ -1,6 +1,6 @@
 use std::os::raw::{c_char, c_int};
 
-use formora_core::{
+use barq_chat_form_core::{
     CssProfile, Condition, FieldSchema, FieldType, FormSchema, SelectOption, ValidationRule,
 };
 
@@ -17,7 +17,7 @@ pub struct FormHandle {
 
 /// Create a new Form. Pass NULL for `id` to auto-generate a UUID.
 #[no_mangle]
-pub extern "C" fn formora_form_new(id: *const c_char) -> *mut FormHandle {
+pub extern "C" fn barq_form_new(id: *const c_char) -> *mut FormHandle {
     let form_id = c_str_to_option(id)
         .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
     Box::into_raw(Box::new(FormHandle { schema: FormSchema::new(form_id) }))
@@ -25,7 +25,7 @@ pub extern "C" fn formora_form_new(id: *const c_char) -> *mut FormHandle {
 
 /// Free a FormHandle
 #[no_mangle]
-pub extern "C" fn formora_form_free(form: *mut FormHandle) {
+pub extern "C" fn barq_form_free(form: *mut FormHandle) {
     if !form.is_null() {
         unsafe { drop(Box::from_raw(form)) };
     }
@@ -35,7 +35,7 @@ pub extern "C" fn formora_form_free(form: *mut FormHandle) {
 
 /// Set the form title
 #[no_mangle]
-pub extern "C" fn formora_form_title(form: *mut FormHandle, text: *const c_char) -> *mut FormHandle {
+pub extern "C" fn barq_form_title(form: *mut FormHandle, text: *const c_char) -> *mut FormHandle {
     if form.is_null() { return form; }
     unsafe { (*form).schema.title = c_str_to_option(text); }
     form
@@ -43,7 +43,7 @@ pub extern "C" fn formora_form_title(form: *mut FormHandle, text: *const c_char)
 
 /// Set the form description
 #[no_mangle]
-pub extern "C" fn formora_form_description(form: *mut FormHandle, text: *const c_char) -> *mut FormHandle {
+pub extern "C" fn barq_form_description(form: *mut FormHandle, text: *const c_char) -> *mut FormHandle {
     if form.is_null() { return form; }
     unsafe { (*form).schema.description = c_str_to_option(text); }
     form
@@ -51,7 +51,7 @@ pub extern "C" fn formora_form_description(form: *mut FormHandle, text: *const c
 
 /// Set CSS via a framework handle (pass NULL for Bootstrap default)
 #[no_mangle]
-pub extern "C" fn formora_form_css_framework(
+pub extern "C" fn barq_form_css_framework(
     form: *mut FormHandle,
     fw: *const CssFrameworkHandle,
 ) -> *mut FormHandle {
@@ -62,7 +62,7 @@ pub extern "C" fn formora_form_css_framework(
 
 /// Set CSS via a profile handle
 #[no_mangle]
-pub extern "C" fn formora_form_css_profile(
+pub extern "C" fn barq_form_css_profile(
     form: *mut FormHandle,
     profile: *const CssProfileHandle,
 ) -> *mut FormHandle {
@@ -73,12 +73,12 @@ pub extern "C" fn formora_form_css_profile(
 
 /// Add a step (enables multi-step mode). Pass NULL for title to omit it.
 #[no_mangle]
-pub extern "C" fn formora_form_step(form: *mut FormHandle, title: *const c_char) -> *mut FormHandle {
+pub extern "C" fn barq_form_step(form: *mut FormHandle, title: *const c_char) -> *mut FormHandle {
     if form.is_null() { return form; }
     unsafe {
         (*form).schema.multi_step = true;
         let idx = (*form).schema.steps.len();
-        (*form).schema.steps.push(formora_core::schema::StepMeta {
+        (*form).schema.steps.push(barq_chat_form_core::schema::StepMeta {
             index: idx,
             title: c_str_to_option(title),
             field_ids: vec![],
@@ -89,7 +89,7 @@ pub extern "C" fn formora_form_step(form: *mut FormHandle, title: *const c_char)
 
 /// Set the submit button label
 #[no_mangle]
-pub extern "C" fn formora_form_submit_label(form: *mut FormHandle, text: *const c_char) -> *mut FormHandle {
+pub extern "C" fn barq_form_submit_label(form: *mut FormHandle, text: *const c_char) -> *mut FormHandle {
     if form.is_null() { return form; }
     let label = c_str_to_string(text);
     if !label.is_empty() {
@@ -100,7 +100,7 @@ pub extern "C" fn formora_form_submit_label(form: *mut FormHandle, text: *const 
 
 /// Set the success message shown after submission
 #[no_mangle]
-pub extern "C" fn formora_form_success_message(form: *mut FormHandle, text: *const c_char) -> *mut FormHandle {
+pub extern "C" fn barq_form_success_message(form: *mut FormHandle, text: *const c_char) -> *mut FormHandle {
     if form.is_null() { return form; }
     let msg = c_str_to_string(text);
     if !msg.is_empty() {
@@ -109,17 +109,17 @@ pub extern "C" fn formora_form_success_message(form: *mut FormHandle, text: *con
     form
 }
 
-/// Render the form to an HTML string. Caller must free with formora_free_string().
+/// Render the form to an HTML string. Caller must free with barq_free_string().
 #[no_mangle]
-pub extern "C" fn formora_form_build(form: *const FormHandle) -> *mut c_char {
+pub extern "C" fn barq_form_build(form: *const FormHandle) -> *mut c_char {
     if form.is_null() { return string_to_c(String::new()); }
-    let html = formora_core::renderer::render(unsafe { &(*form).schema });
+    let html = barq_chat_form_core::renderer::render(unsafe { &(*form).schema });
     string_to_c(html)
 }
 
-/// Return the form schema as a JSON string. Caller must free with formora_free_string().
+/// Return the form schema as a JSON string. Caller must free with barq_free_string().
 #[no_mangle]
-pub extern "C" fn formora_form_schema_json(form: *const FormHandle) -> *mut c_char {
+pub extern "C" fn barq_form_schema_json(form: *const FormHandle) -> *mut c_char {
     if form.is_null() { return string_to_c("{}".to_string()); }
     let json = serde_json::to_string(unsafe { &(*form).schema }).unwrap_or_else(|_| "{}".to_string());
     string_to_c(json)
@@ -167,7 +167,7 @@ fn push_field(form: *mut FormHandle, field: FieldSchema) -> *mut FormHandle {
 
 /// Add a text input field
 #[no_mangle]
-pub extern "C" fn formora_form_text(
+pub extern "C" fn barq_form_text(
     form: *mut FormHandle,
     id: *const c_char, label: *const c_char,
     placeholder: *const c_char, required: c_int,
@@ -186,7 +186,7 @@ pub extern "C" fn formora_form_text(
 
 /// Add an email input field
 #[no_mangle]
-pub extern "C" fn formora_form_email(
+pub extern "C" fn barq_form_email(
     form: *mut FormHandle,
     id: *const c_char, label: *const c_char,
     required: c_int, help_text: *const c_char,
@@ -203,9 +203,9 @@ pub extern "C" fn formora_form_email(
     })
 }
 
-/// Add a number input field. Pass NaN (use formora_nan()) for absent min/max.
+/// Add a number input field. Pass NaN (use barq_nan()) for absent min/max.
 #[no_mangle]
-pub extern "C" fn formora_form_number(
+pub extern "C" fn barq_form_number(
     form: *mut FormHandle,
     id: *const c_char, label: *const c_char,
     min: f64, max: f64,
@@ -230,7 +230,7 @@ pub extern "C" fn formora_form_number(
 
 /// Add a textarea field. Pass 0 for rows to use default.
 #[no_mangle]
-pub extern "C" fn formora_form_textarea(
+pub extern "C" fn barq_form_textarea(
     form: *mut FormHandle,
     id: *const c_char, label: *const c_char,
     rows: u32, placeholder: *const c_char,
@@ -253,7 +253,7 @@ pub extern "C" fn formora_form_textarea(
 /// Add a select (dropdown) field.
 /// options_json: JSON array of [label, value] pairs, e.g. [["Label","val"],...]
 #[no_mangle]
-pub extern "C" fn formora_form_select(
+pub extern "C" fn barq_form_select(
     form: *mut FormHandle,
     id: *const c_char, label: *const c_char,
     options_json: *const c_char,
@@ -276,7 +276,7 @@ pub extern "C" fn formora_form_select(
 /// options_json: JSON array of [label, value] pairs
 /// default_val_json: JSON array of strings, or NULL
 #[no_mangle]
-pub extern "C" fn formora_form_multi_select(
+pub extern "C" fn barq_form_multi_select(
     form: *mut FormHandle,
     id: *const c_char, label: *const c_char,
     options_json: *const c_char,
@@ -298,7 +298,7 @@ pub extern "C" fn formora_form_multi_select(
 
 /// Add a checkbox field
 #[no_mangle]
-pub extern "C" fn formora_form_checkbox(
+pub extern "C" fn barq_form_checkbox(
     form: *mut FormHandle,
     id: *const c_char, label: *const c_char,
     default_val: c_int,
@@ -318,7 +318,7 @@ pub extern "C" fn formora_form_checkbox(
 /// Add a radio button group.
 /// options_json: JSON array of [label, value] pairs
 #[no_mangle]
-pub extern "C" fn formora_form_radio(
+pub extern "C" fn barq_form_radio(
     form: *mut FormHandle,
     id: *const c_char, label: *const c_char,
     options_json: *const c_char,
@@ -339,7 +339,7 @@ pub extern "C" fn formora_form_radio(
 
 /// Add a date picker
 #[no_mangle]
-pub extern "C" fn formora_form_date(
+pub extern "C" fn barq_form_date(
     form: *mut FormHandle,
     id: *const c_char, label: *const c_char,
     required: c_int, help_text: *const c_char,
@@ -358,7 +358,7 @@ pub extern "C" fn formora_form_date(
 
 /// Add a range slider. Pass NaN for step to use default.
 #[no_mangle]
-pub extern "C" fn formora_form_range(
+pub extern "C" fn barq_form_range(
     form: *mut FormHandle,
     id: *const c_char, label: *const c_char,
     min: f64, max: f64, step: f64,
@@ -380,7 +380,7 @@ pub extern "C" fn formora_form_range(
 /// Add a file upload field.
 /// accept_json: JSON array of MIME types/extensions, or NULL
 #[no_mangle]
-pub extern "C" fn formora_form_file(
+pub extern "C" fn barq_form_file(
     form: *mut FormHandle,
     id: *const c_char, label: *const c_char,
     accept_json: *const c_char,
@@ -400,7 +400,7 @@ pub extern "C" fn formora_form_file(
 
 /// Add a hidden field (carries context, not shown to user)
 #[no_mangle]
-pub extern "C" fn formora_form_hidden(
+pub extern "C" fn barq_form_hidden(
     form: *mut FormHandle,
     id: *const c_char,
     value: *const c_char,
@@ -418,49 +418,49 @@ pub extern "C" fn formora_form_hidden(
 
 /// Returns rule JSON for "required". Pass NULL for message to use default.
 #[no_mangle]
-pub extern "C" fn formora_rule_required(message: *const c_char) -> *mut c_char {
+pub extern "C" fn barq_rule_required(message: *const c_char) -> *mut c_char {
     let r = serde_json::json!({"rule_type":"required","value":null,"message":c_str_to_option(message)});
     string_to_c(r.to_string())
 }
 
 /// Returns rule JSON for "min_length"
 #[no_mangle]
-pub extern "C" fn formora_rule_min_length(n: u32, message: *const c_char) -> *mut c_char {
+pub extern "C" fn barq_rule_min_length(n: u32, message: *const c_char) -> *mut c_char {
     let r = serde_json::json!({"rule_type":"min_length","value":n,"message":c_str_to_option(message)});
     string_to_c(r.to_string())
 }
 
 /// Returns rule JSON for "max_length"
 #[no_mangle]
-pub extern "C" fn formora_rule_max_length(n: u32, message: *const c_char) -> *mut c_char {
+pub extern "C" fn barq_rule_max_length(n: u32, message: *const c_char) -> *mut c_char {
     let r = serde_json::json!({"rule_type":"max_length","value":n,"message":c_str_to_option(message)});
     string_to_c(r.to_string())
 }
 
 /// Returns rule JSON for "min"
 #[no_mangle]
-pub extern "C" fn formora_rule_min(n: f64, message: *const c_char) -> *mut c_char {
+pub extern "C" fn barq_rule_min(n: f64, message: *const c_char) -> *mut c_char {
     let r = serde_json::json!({"rule_type":"min","value":n,"message":c_str_to_option(message)});
     string_to_c(r.to_string())
 }
 
 /// Returns rule JSON for "max"
 #[no_mangle]
-pub extern "C" fn formora_rule_max(n: f64, message: *const c_char) -> *mut c_char {
+pub extern "C" fn barq_rule_max(n: f64, message: *const c_char) -> *mut c_char {
     let r = serde_json::json!({"rule_type":"max","value":n,"message":c_str_to_option(message)});
     string_to_c(r.to_string())
 }
 
 /// Returns rule JSON for "regex"
 #[no_mangle]
-pub extern "C" fn formora_rule_regex(pattern: *const c_char, message: *const c_char) -> *mut c_char {
+pub extern "C" fn barq_rule_regex(pattern: *const c_char, message: *const c_char) -> *mut c_char {
     let r = serde_json::json!({"rule_type":"regex","value":c_str_to_string(pattern),"message":c_str_to_option(message)});
     string_to_c(r.to_string())
 }
 
 /// Returns rule JSON for "email"
 #[no_mangle]
-pub extern "C" fn formora_rule_email(message: *const c_char) -> *mut c_char {
+pub extern "C" fn barq_rule_email(message: *const c_char) -> *mut c_char {
     let r = serde_json::json!({"rule_type":"email","value":null,"message":c_str_to_option(message)});
     string_to_c(r.to_string())
 }
@@ -470,7 +470,7 @@ pub extern "C" fn formora_rule_email(message: *const c_char) -> *mut c_char {
 /// Returns condition JSON: {"field_id":..., "operator":..., "value":...}
 /// value_json: any valid JSON value (string, number, bool, array)
 #[no_mangle]
-pub extern "C" fn formora_condition(
+pub extern "C" fn barq_condition(
     field_id: *const c_char,
     operator: *const c_char,
     value_json: *const c_char,

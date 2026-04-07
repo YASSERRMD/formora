@@ -1,17 +1,17 @@
 [package]
-name = "formora-c"
+name = "barq-chat-form-c"
 version = "0.1.0"
 edition = "2021"
-description = "C-compatible FFI bindings for formora — used by Go and C# wrappers"
+description = "C-compatible FFI bindings for barq-chat-form — used by Go and C# wrappers"
 license = "MIT"
 
 [lib]
-name = "formora_c"
+name = "barq_chat_form_c"
 crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
 serde_json = "1.0"
-formora-core = { path = "../formora-core" }
+barq-chat-form-core = { path = "../barq-chat-form-core" }
 uuid = { version = "1.0", features = ["v4"] }
 libc = "0.2"
 
