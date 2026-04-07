@@ -1,7 +1,7 @@
 """
-Simple Formora Example
+Simple Barq Chat Form Example
 
-This example demonstrates basic form creation with Formora.
+This example demonstrates basic form creation with Barq Chat Form.
 """
 
 from barq_chat_form import Form, CssFramework, Rule

@@ -12,7 +12,7 @@ func main() {
 	defer form.Free()
 
 	form.
-		Title("Welcome to Formora").
+		Title("Welcome to Barq Chat Form").
 		Description("Complete your profile in 3 easy steps.").
 		CSSFramework(barq.Tailwind()).
 		// Step 1

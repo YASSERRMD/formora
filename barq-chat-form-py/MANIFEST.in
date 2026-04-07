@@ -1,5 +1,5 @@
 include README.md
 include LICENSE
-recursive-include formora *.py
-recursive-include formora/adapters *.js
-include formora/formora.pyi
+recursive-include barq_chat_form *.py
+recursive-include barq_chat_form/adapters *.js
+include barq_chat_form/barq_chat_form.pyi

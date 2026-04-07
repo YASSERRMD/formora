@@ -1,7 +1,7 @@
 /**
- * Chainlit Formora Adapter
+ * Chainlit Barq Chat Form Adapter
  *
- * This adapter integrates Formora forms with Chainlit.
+ * This adapter integrates Barq Chat Form forms with Chainlit.
  * It uses Chainlit's window.sendMessage API if available, with fallback to DOM injection.
  *
  * INSTALLATION:

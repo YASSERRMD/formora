@@ -9,7 +9,7 @@ async function main() {
   await init();
 
   const html = new Form("onboarding")
-    .title("Welcome to Formora")
+    .title("Welcome to Barq Chat Form")
     .description("Complete your profile in 3 easy steps.")
     .css(CssFramework.tailwind())
     // Step 1 — Personal Info
