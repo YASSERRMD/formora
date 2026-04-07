@@ -1,17 +1,17 @@
 [package]
-name = "formora"
+name = "barq-chat-form"
 version = "0.1.0"
 edition = "2021"
-description = "Interactive form widgets for chat applications"
+description = "Interactive chat form widgets for chat applications"
 license = "MIT"
 
 [lib]
-name = "formora"
+name = "barq_chat_form"
 crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = { version = "0.20", features = ["extension-module"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-formora-core = { path = "../formora-core" }
+barq-chat-form-core = { path = "../barq-chat-form-core" }
 uuid = { version = "1.0", features = ["v4"] }

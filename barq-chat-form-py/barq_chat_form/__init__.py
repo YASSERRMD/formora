@@ -1,4 +1,4 @@
-from .formora import (
+from .barq_chat_form import (
     PyForm as Form,
     PyRule as Rule,
     PyCondition as Condition,
@@ -6,7 +6,7 @@ from .formora import (
     PyCssProfile as CssProfile,
     PyFormResult as FormResult,
     parse_message as parse,
-    is_formora as is_formora_message,
+    is_barq as is_barq_message,
 )
 
 __all__ = [
@@ -17,5 +17,5 @@ __all__ = [
     "CssProfile",
     "FormResult",
     "parse",
-    "is_formora_message",
+    "is_barq_message",
 ]

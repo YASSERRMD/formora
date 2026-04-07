@@ -11,14 +11,14 @@
  * The adapter automatically detects form submissions and injects the data.
  */
 
-window.addEventListener('formora:submit', (e) => {
+window.addEventListener('barq:submit', (e) => {
   // Gradio typically uses a textarea within a specific container
   const textarea = document.querySelector('textarea[class*="gradio"]') ||
                    document.querySelector('#component-0 textarea') ||
                    document.querySelector('.gradio-container textarea');
 
   if (textarea) {
-    // Inject the formora message
+    // Inject the barq message
     textarea.value = e.detail.raw;
     textarea.dispatchEvent(new Event('input', { bubbles: true }));
 

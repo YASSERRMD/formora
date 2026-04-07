@@ -11,14 +11,14 @@
  * The adapter automatically detects form submissions and injects the data into chat.
  */
 
-window.addEventListener('formora:submit', (e) => {
+window.addEventListener('barq:submit', (e) => {
   // Find Open WebUI's textarea
   const textarea = document.querySelector('textarea[placeholder*="Message"]') ||
                    document.querySelector('#chat-input') ||
                    document.querySelector('textarea');
 
   if (textarea) {
-    // Inject the formora message
+    // Inject the barq message
     textarea.value = e.detail.raw;
     textarea.dispatchEvent(new Event('input', { bubbles: true }));
     textarea.dispatchEvent(new Event('change', { bubbles: true }));

@@ -11,7 +11,7 @@
  * The adapter automatically detects form submissions and sends the message.
  */
 
-window.addEventListener('formora:submit', (e) => {
+window.addEventListener('barq:submit', (e) => {
   // Try Chainlit's API first
   if (window.sendMessage && typeof window.sendMessage === 'function') {
     window.sendMessage(e.detail.raw);
@@ -24,7 +24,7 @@ window.addEventListener('formora:submit', (e) => {
                    document.querySelector('textarea');
 
   if (textarea) {
-    // Inject the formora message
+    // Inject the barq message
     textarea.value = e.detail.raw;
     textarea.dispatchEvent(new Event('input', { bubbles: true }));
     textarea.dispatchEvent(new Event('change', { bubbles: true }));
