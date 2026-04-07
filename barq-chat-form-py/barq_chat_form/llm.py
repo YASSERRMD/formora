@@ -1,7 +1,7 @@
 """
 LLM utility functions for Barq Chat Form.
 
-This module provides helper functions for integrating Formora with LLM applications,
+This module provides helper functions for integrating Barq Chat Form with LLM applications,
 including JSON Schema generation and form result formatting.
 """
 

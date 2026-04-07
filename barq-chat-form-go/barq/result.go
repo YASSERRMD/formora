@@ -27,7 +27,7 @@ func ParseMessage(message string) *FormResult {
 	return &FormResult{ptr: ptr}
 }
 
-// IsFormora returns true if message is a barq submission message.
+// IsBarq returns true if message is a barq submission message.
 func IsBarq(message string) bool {
 	s := cStr(message)
 	defer C.free(unsafe.Pointer(s))

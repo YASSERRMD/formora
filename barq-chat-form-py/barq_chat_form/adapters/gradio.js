@@ -1,7 +1,7 @@
 /**
- * Gradio Formora Adapter
+ * Gradio Barq Chat Form Adapter
  *
- * This adapter integrates Formora forms with Gradio chat interfaces.
+ * This adapter integrates Barq Chat Form forms with Gradio chat interfaces.
  * It targets Gradio's chatbot textarea and triggers the submit action.
  *
  * INSTALLATION:

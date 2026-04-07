@@ -1,7 +1,7 @@
 """
-Chat adapters for Formora.
+Chat adapters for Barq Chat Form.
 
-This package contains JavaScript snippets for integrating Formora forms
+This package contains JavaScript snippets for integrating Barq Chat Form forms
 with various chat UI frameworks.
 """
 

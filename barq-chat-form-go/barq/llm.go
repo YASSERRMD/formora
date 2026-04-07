@@ -25,10 +25,10 @@ type JSONSchema struct {
 	Required   []string                      `json:"required,omitempty"`
 }
 
-// FormoraTypeError is returned when a form result value has the wrong type.
-type FormoraTypeError struct{ msg string }
+// BarqTypeError is returned when a form result value has the wrong type.
+type BarqTypeError struct{ msg string }
 
-func (e *FormoraTypeError) Error() string { return e.msg }
+func (e *BarqTypeError) Error() string { return e.msg }
 
 // ── formSchemaFields ──────────────────────────────────────────────────────────
 
@@ -122,7 +122,7 @@ func fieldToJSONSchemaProp(f schemaField) JSONSchemaProperty {
 // ── FormResultToToolArgs ──────────────────────────────────────────────────────
 
 // FormResultToToolArgs converts a FormResult into a map suitable for tool invocation.
-// Hidden fields are excluded. Returns FormoraTypeError on type mismatch.
+// Hidden fields are excluded. Returns BarqTypeError on type mismatch.
 func FormResultToToolArgs(r *FormResult, f *Form) (map[string]any, error) {
 	fields, err := parseFormSchema(f)
 	if err != nil {
@@ -138,7 +138,7 @@ func FormResultToToolArgs(r *FormResult, f *Form) (map[string]any, error) {
 		val, ok := typed[field.ID]
 		if !ok {
 			if field.Required {
-				return nil, &FormoraTypeError{fmt.Sprintf("required field %q missing", field.ID)}
+				return nil, &BarqTypeError{fmt.Sprintf("required field %q missing", field.ID)}
 			}
 			continue
 		}
@@ -153,38 +153,38 @@ func FormResultToToolArgs(r *FormResult, f *Form) (map[string]any, error) {
 func validateType(f schemaField, val any) error {
 	if val == nil {
 		if f.Required {
-			return &FormoraTypeError{fmt.Sprintf("required field %q is nil", f.ID)}
+			return &BarqTypeError{fmt.Sprintf("required field %q is nil", f.ID)}
 		}
 		return nil
 	}
 	switch f.FieldType {
 	case "Text", "Email", "Textarea", "Date", "Select", "Radio":
 		if _, ok := val.(string); !ok {
-			return &FormoraTypeError{fmt.Sprintf("field %q: expected string, got %T", f.ID, val)}
+			return &BarqTypeError{fmt.Sprintf("field %q: expected string, got %T", f.ID, val)}
 		}
 	case "Number", "Range":
 		n, ok := val.(float64)
 		if !ok {
-			return &FormoraTypeError{fmt.Sprintf("field %q: expected number, got %T", f.ID, val)}
+			return &BarqTypeError{fmt.Sprintf("field %q: expected number, got %T", f.ID, val)}
 		}
 		if f.Min != nil && n < *f.Min {
-			return &FormoraTypeError{fmt.Sprintf("field %q: %v below minimum %v", f.ID, n, *f.Min)}
+			return &BarqTypeError{fmt.Sprintf("field %q: %v below minimum %v", f.ID, n, *f.Min)}
 		}
 		if f.Max != nil && n > *f.Max {
-			return &FormoraTypeError{fmt.Sprintf("field %q: %v above maximum %v", f.ID, n, *f.Max)}
+			return &BarqTypeError{fmt.Sprintf("field %q: %v above maximum %v", f.ID, n, *f.Max)}
 		}
 	case "Checkbox":
 		if _, ok := val.(bool); !ok {
-			return &FormoraTypeError{fmt.Sprintf("field %q: expected bool, got %T", f.ID, val)}
+			return &BarqTypeError{fmt.Sprintf("field %q: expected bool, got %T", f.ID, val)}
 		}
 	case "MultiSelect":
 		arr, ok := val.([]any)
 		if !ok {
-			return &FormoraTypeError{fmt.Sprintf("field %q: expected array, got %T", f.ID, val)}
+			return &BarqTypeError{fmt.Sprintf("field %q: expected array, got %T", f.ID, val)}
 		}
 		for _, item := range arr {
 			if _, ok := item.(string); !ok {
-				return &FormoraTypeError{fmt.Sprintf("field %q: array items must be strings", f.ID)}
+				return &BarqTypeError{fmt.Sprintf("field %q: array items must be strings", f.ID)}
 			}
 		}
 	}

@@ -1,7 +1,7 @@
 /**
- * Open WebUI Formora Adapter
+ * Open WebUI Barq Chat Form Adapter
  *
- * This adapter integrates Formora forms with Open WebUI.
+ * This adapter integrates Barq Chat Form forms with Open WebUI.
  * It injects the form data into the chat textarea and triggers the send button.
  *
  * INSTALLATION:

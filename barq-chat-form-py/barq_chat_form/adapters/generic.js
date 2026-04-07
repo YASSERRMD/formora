@@ -1,5 +1,5 @@
 /**
- * Generic Formora Adapter
+ * Generic Barq Chat Form Adapter
  *
  * This adapter works with any chat UI that allows custom JavaScript.
  * It listens for the barq:submit event and logs the data.
@@ -16,7 +16,7 @@ window.addEventListener('barq:submit', (e) => {
   // e.detail.raw  → the __barq__... string to send as chat message
   // e.detail.parsed → the structured data object
 
-  console.log('Formora form submitted:', e.detail.parsed);
+  console.log('Barq Chat Form submitted:', e.detail.parsed);
 
   // TODO: Inject e.detail.raw into your chat input and trigger send
   // Example:

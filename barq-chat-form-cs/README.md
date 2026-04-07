@@ -1,6 +1,6 @@
 # barq-chat-form-cs
 
-C# (.NET 8) bindings for **formora** — a high-performance form rendering engine that generates rich, interactive HTML forms for chat and LLM applications.
+C# (.NET 8) bindings for **barq-chat-form** — a high-performance form rendering engine that generates rich, interactive HTML forms for chat and LLM applications.
 
 Powered by a Rust core compiled to a native shared library (`barq-chat-form-c`) and wrapped via **P/Invoke** (`LibraryImport`).
 
@@ -45,7 +45,7 @@ export DYLD_LIBRARY_PATH="$PWD/../barq-chat-form-c/target/release:$DYLD_LIBRARY_
 
 ```xml
 <ItemGroup>
-  <ProjectReference Include="path/to/barq-chat-form-cs/src/Formora/BarqChatForm.csproj" />
+  <ProjectReference Include="path/to/barq-chat-form-cs/src/BarqChatForm/BarqChatForm.csproj" />
 </ItemGroup>
 ```
 

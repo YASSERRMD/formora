@@ -49,7 +49,7 @@ pub fn parse_message(message: String) -> Option<FormResult> {
 }
 
 /// Returns `true` if the message starts with the barq prefix
-#[wasm_bindgen(js_name = isFormora)]
+#[wasm_bindgen(js_name = isBarq)]
 pub fn is_barq(message: String) -> bool {
     is_barq_message(&message)
 }
