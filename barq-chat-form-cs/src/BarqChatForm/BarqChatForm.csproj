@@ -4,9 +4,9 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyName>Formora</AssemblyName>
-    <RootNamespace>Formora</RootNamespace>
+    <AssemblyName>BarqChatForm</AssemblyName>
+    <RootNamespace>BarqChatForm</RootNamespace>
     <Version>0.1.0</Version>
-    <Description>C# bindings for the formora form rendering engine</Description>
+    <Description>C# bindings for the barq-chat-form rendering engine</Description>
   </PropertyGroup>
 </Project>

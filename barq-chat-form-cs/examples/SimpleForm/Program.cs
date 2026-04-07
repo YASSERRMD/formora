@@ -1,6 +1,6 @@
 // Simple contact form example.
 // C# equivalent of examples/simple_form.py
-using Formora;
+using BarqChatForm;
 
 using var form = new Form("contact-form");
 

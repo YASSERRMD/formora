@@ -1,7 +1,7 @@
-using Formora.Native;
+using BarqChatForm.Native;
 using System.Text.Json;
 
-namespace Formora;
+namespace BarqChatForm;
 
 /// <summary>A parsed form submission result.</summary>
 public sealed class FormResult : IDisposable
@@ -42,12 +42,12 @@ public sealed class FormResult : IDisposable
     public string AsText() => NativeMethods.ConsumeString(NativeMethods.ResultAsText(_handle));
 }
 
-/// <summary>Parse and detect formora messages.</summary>
-public static class FormoraParser
+/// <summary>Parse and detect barq messages.</summary>
+public static class BarqParser
 {
     /// <summary>
-    /// Parse a <c>__formora__{...}</c> message.
-    /// Returns null if the message is not a formora submission.
+    /// Parse a <c>__barq__{...}</c> message.
+    /// Returns null if the message is not a barq submission.
     /// </summary>
     public static FormResult? ParseMessage(string message)
     {
@@ -55,6 +55,6 @@ public static class FormoraParser
         return ptr == IntPtr.Zero ? null : new FormResult(ptr);
     }
 
-    /// <summary>Returns true if the message is a formora submission.</summary>
-    public static bool IsFormora(string message) => NativeMethods.IsFormora(message) == 1;
+    /// <summary>Returns true if the message is a barq submission.</summary>
+    public static bool IsBarq(string message) => NativeMethods.IsBarq(message) == 1;
 }

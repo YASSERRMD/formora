@@ -1,215 +1,215 @@
 using System.Runtime.InteropServices;
 
-namespace Formora.Native;
+namespace BarqChatForm.Native;
 
 /// <summary>
-/// P/Invoke declarations for the formora_c native library.
+/// P/Invoke declarations for the barq_c native library.
 /// All string parameters are UTF-8. Strings returned from Rust must be freed
-/// with FormoraFreeString(). Opaque handles must be freed with their _Free counterparts.
+/// with BarqFreeString(). Opaque handles must be freed with their _Free counterparts.
 /// </summary>
 internal static partial class NativeMethods
 {
-    private const string Lib = "formora_c";
+    private const string Lib = "barq_chat_form_c";
 
     // ── Memory ────────────────────────────────────────────────────────────────
-    [LibraryImport(Lib, EntryPoint = "formora_free_string")]
-    internal static partial void FormoraFreeString(IntPtr s);
+    [LibraryImport(Lib, EntryPoint = "barq_free_string")]
+    internal static partial void BarqFreeString(IntPtr s);
 
     // ── CssFramework ──────────────────────────────────────────────────────────
-    [LibraryImport(Lib, EntryPoint = "formora_css_bootstrap")]
+    [LibraryImport(Lib, EntryPoint = "barq_css_bootstrap")]
     internal static partial IntPtr CssBootstrap();
 
-    [LibraryImport(Lib, EntryPoint = "formora_css_tailwind")]
+    [LibraryImport(Lib, EntryPoint = "barq_css_tailwind")]
     internal static partial IntPtr CssTailwind();
 
-    [LibraryImport(Lib, EntryPoint = "formora_css_custom")]
+    [LibraryImport(Lib, EntryPoint = "barq_css_custom")]
     internal static partial IntPtr CssCustom();
 
-    [LibraryImport(Lib, EntryPoint = "formora_css_framework_free")]
+    [LibraryImport(Lib, EntryPoint = "barq_css_framework_free")]
     internal static partial void CssFrameworkFree(IntPtr fw);
 
     // ── CssProfile ────────────────────────────────────────────────────────────
-    [LibraryImport(Lib, EntryPoint = "formora_css_profile_new")]
+    [LibraryImport(Lib, EntryPoint = "barq_css_profile_new")]
     internal static partial IntPtr CssProfileNew(IntPtr fw);
 
-    [LibraryImport(Lib, EntryPoint = "formora_css_profile_from_json",
+    [LibraryImport(Lib, EntryPoint = "barq_css_profile_from_json",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr CssProfileFromJson(string json);
 
-    [LibraryImport(Lib, EntryPoint = "formora_css_profile_override",
+    [LibraryImport(Lib, EntryPoint = "barq_css_profile_override",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr CssProfileOverride(IntPtr profile, string overridesJson);
 
-    [LibraryImport(Lib, EntryPoint = "formora_css_profile_free")]
+    [LibraryImport(Lib, EntryPoint = "barq_css_profile_free")]
     internal static partial void CssProfileFree(IntPtr profile);
 
     // ── Form lifecycle ────────────────────────────────────────────────────────
-    [LibraryImport(Lib, EntryPoint = "formora_form_new",
+    [LibraryImport(Lib, EntryPoint = "barq_form_new",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr FormNew(string? id);
 
-    [LibraryImport(Lib, EntryPoint = "formora_form_free")]
+    [LibraryImport(Lib, EntryPoint = "barq_form_free")]
     internal static partial void FormFree(IntPtr form);
 
     // ── Form builder ──────────────────────────────────────────────────────────
-    [LibraryImport(Lib, EntryPoint = "formora_form_title",
+    [LibraryImport(Lib, EntryPoint = "barq_form_title",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr FormTitle(IntPtr form, string text);
 
-    [LibraryImport(Lib, EntryPoint = "formora_form_description",
+    [LibraryImport(Lib, EntryPoint = "barq_form_description",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr FormDescription(IntPtr form, string text);
 
-    [LibraryImport(Lib, EntryPoint = "formora_form_css_framework")]
+    [LibraryImport(Lib, EntryPoint = "barq_form_css_framework")]
     internal static partial IntPtr FormCssFramework(IntPtr form, IntPtr fw);
 
-    [LibraryImport(Lib, EntryPoint = "formora_form_css_profile")]
+    [LibraryImport(Lib, EntryPoint = "barq_form_css_profile")]
     internal static partial IntPtr FormCssProfile(IntPtr form, IntPtr profile);
 
-    [LibraryImport(Lib, EntryPoint = "formora_form_step",
+    [LibraryImport(Lib, EntryPoint = "barq_form_step",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr FormStep(IntPtr form, string? title);
 
-    [LibraryImport(Lib, EntryPoint = "formora_form_submit_label",
+    [LibraryImport(Lib, EntryPoint = "barq_form_submit_label",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr FormSubmitLabel(IntPtr form, string text);
 
-    [LibraryImport(Lib, EntryPoint = "formora_form_success_message",
+    [LibraryImport(Lib, EntryPoint = "barq_form_success_message",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr FormSuccessMessage(IntPtr form, string text);
 
-    [LibraryImport(Lib, EntryPoint = "formora_form_build")]
+    [LibraryImport(Lib, EntryPoint = "barq_form_build")]
     internal static partial IntPtr FormBuild(IntPtr form);
 
-    [LibraryImport(Lib, EntryPoint = "formora_form_schema_json")]
+    [LibraryImport(Lib, EntryPoint = "barq_form_schema_json")]
     internal static partial IntPtr FormSchemaJson(IntPtr form);
 
     // ── Field methods ─────────────────────────────────────────────────────────
-    [LibraryImport(Lib, EntryPoint = "formora_form_text",
+    [LibraryImport(Lib, EntryPoint = "barq_form_text",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr FormText(IntPtr form, string id, string label,
         string? placeholder, int required, string? helpText,
         string? defaultVal, string? rulesJson, string? showIfJson);
 
-    [LibraryImport(Lib, EntryPoint = "formora_form_email",
+    [LibraryImport(Lib, EntryPoint = "barq_form_email",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr FormEmail(IntPtr form, string id, string label,
         int required, string? helpText, string? defaultVal,
         string? rulesJson, string? showIfJson);
 
-    [LibraryImport(Lib, EntryPoint = "formora_form_number",
+    [LibraryImport(Lib, EntryPoint = "barq_form_number",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr FormNumber(IntPtr form, string id, string label,
         double min, double max, int required, string? helpText,
         string? defaultVal, string? rulesJson, string? showIfJson);
 
-    [LibraryImport(Lib, EntryPoint = "formora_form_textarea",
+    [LibraryImport(Lib, EntryPoint = "barq_form_textarea",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr FormTextarea(IntPtr form, string id, string label,
         uint rows, string? placeholder, int required, string? helpText,
         string? defaultVal, string? rulesJson, string? showIfJson);
 
-    [LibraryImport(Lib, EntryPoint = "formora_form_select",
+    [LibraryImport(Lib, EntryPoint = "barq_form_select",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr FormSelect(IntPtr form, string id, string label,
         string? optionsJson, int required, string? helpText,
         string? defaultVal, string? rulesJson, string? showIfJson);
 
-    [LibraryImport(Lib, EntryPoint = "formora_form_multi_select",
+    [LibraryImport(Lib, EntryPoint = "barq_form_multi_select",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr FormMultiSelect(IntPtr form, string id, string label,
         string? optionsJson, int required, string? helpText,
         string? defaultValJson, string? rulesJson, string? showIfJson);
 
-    [LibraryImport(Lib, EntryPoint = "formora_form_checkbox",
+    [LibraryImport(Lib, EntryPoint = "barq_form_checkbox",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr FormCheckbox(IntPtr form, string id, string label,
         int defaultVal, string? helpText, string? rulesJson, string? showIfJson);
 
-    [LibraryImport(Lib, EntryPoint = "formora_form_radio",
+    [LibraryImport(Lib, EntryPoint = "barq_form_radio",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr FormRadio(IntPtr form, string id, string label,
         string? optionsJson, int required, string? helpText,
         string? defaultVal, string? rulesJson, string? showIfJson);
 
-    [LibraryImport(Lib, EntryPoint = "formora_form_date",
+    [LibraryImport(Lib, EntryPoint = "barq_form_date",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr FormDate(IntPtr form, string id, string label,
         int required, string? helpText, string? defaultVal,
         string? rulesJson, string? showIfJson);
 
-    [LibraryImport(Lib, EntryPoint = "formora_form_range",
+    [LibraryImport(Lib, EntryPoint = "barq_form_range",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr FormRange(IntPtr form, string id, string label,
         double min, double max, double step, double defaultVal,
         string? helpText, string? showIfJson);
 
-    [LibraryImport(Lib, EntryPoint = "formora_form_file",
+    [LibraryImport(Lib, EntryPoint = "barq_form_file",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr FormFile(IntPtr form, string id, string label,
         string? acceptJson, int required, string? helpText,
         string? rulesJson, string? showIfJson);
 
-    [LibraryImport(Lib, EntryPoint = "formora_form_hidden",
+    [LibraryImport(Lib, EntryPoint = "barq_form_hidden",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr FormHidden(IntPtr form, string id, string value);
 
     // ── Rule helpers ──────────────────────────────────────────────────────────
-    [LibraryImport(Lib, EntryPoint = "formora_rule_required",
+    [LibraryImport(Lib, EntryPoint = "barq_rule_required",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr RuleRequired(string? message);
 
-    [LibraryImport(Lib, EntryPoint = "formora_rule_min_length",
+    [LibraryImport(Lib, EntryPoint = "barq_rule_min_length",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr RuleMinLength(uint n, string? message);
 
-    [LibraryImport(Lib, EntryPoint = "formora_rule_max_length",
+    [LibraryImport(Lib, EntryPoint = "barq_rule_max_length",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr RuleMaxLength(uint n, string? message);
 
-    [LibraryImport(Lib, EntryPoint = "formora_rule_min",
+    [LibraryImport(Lib, EntryPoint = "barq_rule_min",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr RuleMin(double n, string? message);
 
-    [LibraryImport(Lib, EntryPoint = "formora_rule_max",
+    [LibraryImport(Lib, EntryPoint = "barq_rule_max",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr RuleMax(double n, string? message);
 
-    [LibraryImport(Lib, EntryPoint = "formora_rule_regex",
+    [LibraryImport(Lib, EntryPoint = "barq_rule_regex",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr RuleRegex(string pattern, string? message);
 
-    [LibraryImport(Lib, EntryPoint = "formora_rule_email",
+    [LibraryImport(Lib, EntryPoint = "barq_rule_email",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr RuleEmail(string? message);
 
     // ── Condition helper ──────────────────────────────────────────────────────
-    [LibraryImport(Lib, EntryPoint = "formora_condition",
+    [LibraryImport(Lib, EntryPoint = "barq_condition",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr Condition(string fieldId, string @operator, string valueJson);
 
     // ── Parser ────────────────────────────────────────────────────────────────
-    [LibraryImport(Lib, EntryPoint = "formora_parse",
+    [LibraryImport(Lib, EntryPoint = "barq_parse",
         StringMarshalling = StringMarshalling.Utf8)]
     internal static partial IntPtr Parse(string message);
 
-    [LibraryImport(Lib, EntryPoint = "formora_is_formora",
+    [LibraryImport(Lib, EntryPoint = "barq_is_barq",
         StringMarshalling = StringMarshalling.Utf8)]
-    internal static partial int IsFormora(string message);
+    internal static partial int IsBarq(string message);
 
-    [LibraryImport(Lib, EntryPoint = "formora_result_free")]
+    [LibraryImport(Lib, EntryPoint = "barq_result_free")]
     internal static partial void ResultFree(IntPtr result);
 
-    [LibraryImport(Lib, EntryPoint = "formora_result_form_id")]
+    [LibraryImport(Lib, EntryPoint = "barq_result_form_id")]
     internal static partial IntPtr ResultFormId(IntPtr result);
 
-    [LibraryImport(Lib, EntryPoint = "formora_result_data_json")]
+    [LibraryImport(Lib, EntryPoint = "barq_result_data_json")]
     internal static partial IntPtr ResultDataJson(IntPtr result);
 
-    [LibraryImport(Lib, EntryPoint = "formora_result_typed_data_json")]
+    [LibraryImport(Lib, EntryPoint = "barq_result_typed_data_json")]
     internal static partial IntPtr ResultTypedDataJson(IntPtr result);
 
-    [LibraryImport(Lib, EntryPoint = "formora_result_as_text")]
+    [LibraryImport(Lib, EntryPoint = "barq_result_as_text")]
     internal static partial IntPtr ResultAsText(IntPtr result);
 
     // ── Utility ───────────────────────────────────────────────────────────────
@@ -220,7 +220,7 @@ internal static partial class NativeMethods
     {
         if (ptr == IntPtr.Zero) return string.Empty;
         var s = Marshal.PtrToStringUTF8(ptr) ?? string.Empty;
-        FormoraFreeString(ptr);
+        BarqFreeString(ptr);
         return s;
     }
 }

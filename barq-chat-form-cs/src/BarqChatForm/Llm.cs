@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Formora;
+namespace BarqChatForm;
 
 // ── JSON Schema types ──────────────────────────────────────────────────────────
 
@@ -21,7 +21,7 @@ public record JsonSchema(
 );
 
 /// <summary>Thrown when a form result value does not match the expected field type.</summary>
-public class FormoraTypeError(string message) : Exception(message);
+public class BarqTypeError(string message) : Exception(message);
 
 // ── LLM utilities ──────────────────────────────────────────────────────────────
 
@@ -94,7 +94,7 @@ public static class Llm
 
     /// <summary>
     /// Convert a FormResult into a dictionary suitable for tool invocation.
-    /// Hidden fields are excluded. Throws <see cref="FormoraTypeError"/> on type mismatch.
+    /// Hidden fields are excluded. Throws <see cref="BarqTypeError"/> on type mismatch.
     /// </summary>
     public static Dictionary<string, object?> FormResultToToolArgs(FormResult result, Form form)
     {
@@ -109,7 +109,7 @@ public static class Llm
             if (!typed.TryGetValue(f.Id, out var val))
             {
                 if (f.Required)
-                    throw new FormoraTypeError($"Required field '{f.Id}' missing from form result");
+                    throw new BarqTypeError($"Required field '{f.Id}' missing from form result");
                 continue;
             }
 
@@ -124,7 +124,7 @@ public static class Llm
     {
         if (val is null)
         {
-            if (f.Required) throw new FormoraTypeError($"Required field '{f.Id}' is null");
+            if (f.Required) throw new BarqTypeError($"Required field '{f.Id}' is null");
             return;
         }
 
@@ -135,27 +135,27 @@ public static class Llm
         {
             case "Text" or "Email" or "Textarea" or "Date" or "Select" or "Radio":
                 if (je.ValueKind != JsonValueKind.String)
-                    throw new FormoraTypeError($"Field '{f.Id}': expected string, got {je.ValueKind}");
+                    throw new BarqTypeError($"Field '{f.Id}': expected string, got {je.ValueKind}");
                 break;
 
             case "Number" or "Range":
                 if (je.ValueKind != JsonValueKind.Number)
-                    throw new FormoraTypeError($"Field '{f.Id}': expected number, got {je.ValueKind}");
+                    throw new BarqTypeError($"Field '{f.Id}': expected number, got {je.ValueKind}");
                 var n = je.GetDouble();
                 if (f.Min.HasValue && n < f.Min.Value)
-                    throw new FormoraTypeError($"Field '{f.Id}': {n} is below minimum {f.Min}");
+                    throw new BarqTypeError($"Field '{f.Id}': {n} is below minimum {f.Min}");
                 if (f.Max.HasValue && n > f.Max.Value)
-                    throw new FormoraTypeError($"Field '{f.Id}': {n} is above maximum {f.Max}");
+                    throw new BarqTypeError($"Field '{f.Id}': {n} is above maximum {f.Max}");
                 break;
 
             case "Checkbox":
                 if (je.ValueKind is not JsonValueKind.True and not JsonValueKind.False)
-                    throw new FormoraTypeError($"Field '{f.Id}': expected boolean, got {je.ValueKind}");
+                    throw new BarqTypeError($"Field '{f.Id}': expected boolean, got {je.ValueKind}");
                 break;
 
             case "MultiSelect":
                 if (je.ValueKind != JsonValueKind.Array)
-                    throw new FormoraTypeError($"Field '{f.Id}': expected array, got {je.ValueKind}");
+                    throw new BarqTypeError($"Field '{f.Id}': expected array, got {je.ValueKind}");
                 break;
         }
     }

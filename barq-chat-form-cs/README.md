@@ -1,8 +1,8 @@
-# formora-cs
+# barq-chat-form-cs
 
 C# (.NET 8) bindings for **formora** — a high-performance form rendering engine that generates rich, interactive HTML forms for chat and LLM applications.
 
-Powered by a Rust core compiled to a native shared library (`formora-c`) and wrapped via **P/Invoke** (`LibraryImport`).
+Powered by a Rust core compiled to a native shared library (`barq-chat-form-c`) and wrapped via **P/Invoke** (`LibraryImport`).
 
 ---
 
@@ -11,7 +11,7 @@ Powered by a Rust core compiled to a native shared library (`formora-c`) and wra
 | Tool | Version |
 |------|---------|
 | .NET | 8.0+ |
-| Rust | stable (for building `formora-c`) |
+| Rust | stable (for building `barq-chat-form-c`) |
 
 ---
 
@@ -20,32 +20,32 @@ Powered by a Rust core compiled to a native shared library (`formora-c`) and wra
 ### 1 — Build the native library
 
 ```bash
-cd formora-cs
+cd barq-chat-form-cs
 ./build.sh
 ```
 
-This compiles `formora-c` in release mode. The native library is placed at
-`../formora-c/target/release/libformora_c.{so,dylib,dll}`.
+This compiles `barq-chat-form-c` in release mode. The native library is placed at
+`../barq-chat-form-c/target/release/libbarq_chat_form_c.{so,dylib,dll}`.
 
 ### 2 — Set the library search path
 
 **Linux**
 ```bash
-export LD_LIBRARY_PATH="$PWD/../formora-c/target/release:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$PWD/../barq-chat-form-c/target/release:$LD_LIBRARY_PATH"
 ```
 
 **macOS**
 ```bash
-export DYLD_LIBRARY_PATH="$PWD/../formora-c/target/release:$DYLD_LIBRARY_PATH"
+export DYLD_LIBRARY_PATH="$PWD/../barq-chat-form-c/target/release:$DYLD_LIBRARY_PATH"
 ```
 
-**Windows** — copy `formora_c.dll` to your output directory or add it to `PATH`.
+**Windows** — copy `barq_chat_form_c.dll` to your output directory or add it to `PATH`.
 
 ### 3 — Reference the project
 
 ```xml
 <ItemGroup>
-  <ProjectReference Include="path/to/formora-cs/src/Formora/Formora.csproj" />
+  <ProjectReference Include="path/to/barq-chat-form-cs/src/Formora/BarqChatForm.csproj" />
 </ItemGroup>
 ```
 
@@ -54,7 +54,7 @@ export DYLD_LIBRARY_PATH="$PWD/../formora-c/target/release:$DYLD_LIBRARY_PATH"
 ## Quick Start
 
 ```csharp
-using Formora;
+using BarqChatForm;
 
 using var form = new Form("contact-form");
 
@@ -164,9 +164,9 @@ form.Css(profile);
 ### Parsing Submissions
 
 ```csharp
-if (FormoraParser.IsFormora(message))
+if (BarqParser.IsBarq(message))
 {
-    using var result = FormoraParser.ParseMessage(message)!;
+    using var result = BarqParser.ParseMessage(message)!;
     Console.WriteLine(result.FormId);
     Console.WriteLine(result.AsText());
 
@@ -182,7 +182,7 @@ if (FormoraParser.IsFormora(message))
 var schema = Llm.FormToJsonSchema(form);
 
 // Validated args dictionary
-var args = Llm.FormResultToToolArgs(result, form);   // throws FormoraTypeError on mismatch
+var args = Llm.FormResultToToolArgs(result, form);   // throws BarqTypeError on mismatch
 
 // Human-readable prompt string
 var prompt = Llm.FormResultToPrompt(result);

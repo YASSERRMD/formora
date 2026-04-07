@@ -1,7 +1,7 @@
-using Formora.Native;
+using BarqChatForm.Native;
 using System.Text.Json;
 
-namespace Formora;
+namespace BarqChatForm;
 
 /// <summary>A label/value pair for select, radio, and multi-select fields.</summary>
 public record SelectOption(string Label, string Value);

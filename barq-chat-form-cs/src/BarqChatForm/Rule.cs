@@ -1,8 +1,8 @@
-using Formora.Native;
+using BarqChatForm.Native;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 
-namespace Formora;
+namespace BarqChatForm;
 
 /// <summary>A JSON-encoded validation rule. Build with the static factory methods.</summary>
 public readonly struct Rule

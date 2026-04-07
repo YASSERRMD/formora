@@ -1,11 +1,11 @@
 // Multi-step onboarding form example.
 // C# equivalent of examples/multistep_form.py
-using Formora;
+using BarqChatForm;
 
 using var form = new Form("onboarding");
 
 var html = form
-    .Title("Welcome to Formora")
+    .Title("Welcome to Barq Chat Form")
     .Description("Complete your profile in 3 easy steps.")
     .Css(CssFramework.Tailwind())
     // Step 1
