@@ -1,13 +1,13 @@
 use wasm_bindgen::prelude::*;
 
-use formora_core::{parse, is_formora_message};
+use barq_chat_form_core::{parse, is_barq_message};
 
 use crate::helpers::json_to_js;
 
 /// Parsed form submission result
 #[wasm_bindgen]
 pub struct FormResult {
-    result: formora_core::FormResult,
+    result: barq_chat_form_core::FormResult,
 }
 
 #[wasm_bindgen]
@@ -41,15 +41,15 @@ impl FormResult {
     }
 }
 
-/// Parse a `__formora__{...}` message into a FormResult.
-/// Returns `undefined` if the message is not a formora submission.
+/// Parse a `__barq__{...}` message into a FormResult.
+/// Returns `undefined` if the message is not a barq submission.
 #[wasm_bindgen(js_name = parseMessage)]
 pub fn parse_message(message: String) -> Option<FormResult> {
     parse(&message).map(|result| FormResult { result })
 }
 
-/// Returns `true` if the message starts with the formora prefix
+/// Returns `true` if the message starts with the barq prefix
 #[wasm_bindgen(js_name = isFormora)]
-pub fn is_formora(message: String) -> bool {
-    is_formora_message(&message)
+pub fn is_barq(message: String) -> bool {
+    is_barq_message(&message)
 }

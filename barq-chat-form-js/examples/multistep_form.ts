@@ -3,7 +3,7 @@
  * TypeScript equivalent of examples/multistep_form.py
  */
 
-import init, { Form, Rule, CssFramework } from "../wasm/formora_js";
+import init, { Form, Rule, CssFramework } from "../wasm/barq_chat_form_js";
 
 async function main() {
   await init();

@@ -1,7 +1,7 @@
 use js_sys::Array;
 use wasm_bindgen::prelude::*;
 
-use formora_core::{CssProfile, FieldSchema, FieldType, FormSchema, SelectOption};
+use barq_chat_form_core::{CssProfile, FieldSchema, FieldType, FormSchema, SelectOption};
 
 use crate::css::{resolve_profile, CssFramework, JsCssProfile};
 use crate::rules::{JsCondition, Rule};
@@ -49,7 +49,7 @@ impl Form {
     /// Add a step — enables multi-step mode
     pub fn step(mut self, title: Option<String>) -> Form {
         self.schema.multi_step = true;
-        self.schema.steps.push(formora_core::schema::StepMeta {
+        self.schema.steps.push(barq_chat_form_core::schema::StepMeta {
             index: self.schema.steps.len(),
             title,
             field_ids: vec![],
@@ -73,7 +73,7 @@ impl Form {
 
     /// Render the form to an HTML string
     pub fn build(&self) -> String {
-        formora_core::renderer::render(&self.schema)
+        barq_chat_form_core::renderer::render(&self.schema)
     }
 
     /// Return the form schema as a JSON string (used by llm.ts for introspection)
