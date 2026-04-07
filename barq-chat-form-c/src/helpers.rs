@@ -21,7 +21,7 @@ pub(crate) fn c_str_to_option(ptr: *const c_char) -> Option<String> {
 }
 
 /// Convert a Rust String to a heap-allocated C string.
-/// The caller is responsible for freeing it with formora_free_string().
+/// The caller is responsible for freeing it with barq_free_string().
 pub(crate) fn string_to_c(s: String) -> *mut c_char {
     CString::new(s).unwrap_or_default().into_raw()
 }
@@ -42,10 +42,10 @@ pub(crate) fn parse_json_value(ptr: *const c_char) -> serde_json::Value {
         .unwrap_or(serde_json::Value::Null)
 }
 
-/// Free a C string that was allocated by formora.
-/// Must be called on every string returned by the formora C API.
+/// Free a C string that was allocated by barq-chat-form.
+/// Must be called on every string returned by the barq-chat-form C API.
 #[no_mangle]
-pub extern "C" fn formora_free_string(s: *mut c_char) {
+pub extern "C" fn barq_free_string(s: *mut c_char) {
     if !s.is_null() {
         unsafe { drop(CString::from_raw(s)) };
     }
