@@ -13,15 +13,15 @@ pub fn render(schema: &FormSchema) -> String {
     // Outer wrapper
     let wrapper_class = &schema.css_profile.form_wrapper;
     if !wrapper_class.is_empty() {
-        html.push_str(&format!(r#"<div class="{}" data-formora-id="{}">"#, wrapper_class, schema.form_id));
+        html.push_str(&format!(r#"<div class="{}" data-barq-id="{}">"#, wrapper_class, schema.form_id));
     } else {
-        html.push_str(&format!(r#"<div data-formora-id="{}">"#, schema.form_id));
+        html.push_str(&format!(r#"<div data-barq-id="{}">"#, schema.form_id));
     }
 
     // CSS framework comment
     match schema.css_framework.as_str() {
-        "bootstrap" => html.push_str(r#"<!-- formora:bootstrap -->"#),
-        "tailwind" => html.push_str(r#"<!-- formora:tailwind -->"#),
+        "bootstrap" => html.push_str(r#"<!-- barq:bootstrap -->"#),
+        "tailwind" => html.push_str(r#"<!-- barq:tailwind -->"#),
         "custom" => {
             // Inject minimal styles for custom mode
             html.push_str(&crate::css::custom::minimal_inline_styles());
@@ -915,7 +915,7 @@ fn render_javascript(schema: &FormSchema) -> String {
 
   // Helper: Get widget element
   function getWidget() {{
-    return document.querySelector('[data-formora-id="' + formId + '"]');
+    return document.querySelector('[data-barq-id="' + formId + '"]');
   }}
 
   // Helper: Get form element
@@ -966,7 +966,7 @@ fn render_javascript(schema: &FormSchema) -> String {
             else input.value = '';
           }}
         }}
-      }} catch (e) {{ console.error('formora condition error:', e); }}
+      }} catch (e) {{ console.error('barq condition error:', e); }}
     }});
   }}
 
@@ -989,7 +989,7 @@ fn render_javascript(schema: &FormSchema) -> String {
       if (errorDiv) errorDiv.style.display = 'none';
       if (errorClass) field.classList.remove(errorClass);
       return true;
-    }} catch (e) {{ console.error('formora validation error:', e); return true; }}
+    }} catch (e) {{ console.error('barq validation error:', e); return true; }}
   }}
 
   // Evaluate a validation rule
@@ -1070,7 +1070,7 @@ fn render_javascript(schema: &FormSchema) -> String {
       let selectedValues = [];
 
       function renderTags() {{
-        container.querySelectorAll(tagClass ? '.' + tagClass.split(' ')[0] : '.formora-tag').forEach(t => t.remove());
+        container.querySelectorAll(tagClass ? '.' + tagClass.split(' ')[0] : '.barq-tag').forEach(t => t.remove());
         selectedValues.forEach(function(val) {{
           const option = dropdown.querySelector('[data-value="' + val + '"]');
           const label = option ? option.textContent : val;
@@ -1120,7 +1120,7 @@ fn render_javascript(schema: &FormSchema) -> String {
 
     // Strategy 2: postMessage to parent (iframe embeddings)
     if (window.parent && window.parent !== window) {{
-      window.parent.postMessage({{ type: 'formora:submit', raw: message }}, '*');
+      window.parent.postMessage({{ type: 'barq:submit', raw: message }}, '*');
     }}
 
     // Strategy 3: Find chat textarea across known frameworks
@@ -1225,7 +1225,7 @@ fn render_javascript(schema: &FormSchema) -> String {
       data[field.name] = value;
     }});
 
-    const message = '__formora__' + JSON.stringify({{ form_id: formId, data: data }});
+    const message = '__barq__' + JSON.stringify({{ form_id: formId, data: data }});
 
     // ── Sending state on button ─────────────────────────────────────────────
     const originalLabel = btn ? btn.innerHTML : '';
@@ -1235,12 +1235,12 @@ fn render_javascript(schema: &FormSchema) -> String {
       btn.style.opacity = '0.7';
       btn.style.cursor  = 'not-allowed';
       btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px">'
-        + '<svg style="animation:formora-spin 1s linear infinite;width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>'
+        + '<svg style="animation:barq-spin 1s linear infinite;width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>'
         + 'Sending\u2026</span>';
     }}
 
     // Dispatch event for external listeners (adapters, custom code)
-    window.dispatchEvent(new CustomEvent('formora:submit', {{
+    window.dispatchEvent(new CustomEvent('barq:submit', {{
       detail: {{ raw: message, parsed: data, form_id: formId }}
     }}));
 
@@ -1270,10 +1270,10 @@ fn render_javascript(schema: &FormSchema) -> String {
     if (!form || !widget) return;
 
     // Inject spinner keyframe once per page
-    if (!document.getElementById('formora-spin-style')) {{
+    if (!document.getElementById('barq-spin-style')) {{
       const style = document.createElement('style');
-      style.id = 'formora-spin-style';
-      style.textContent = '@keyframes formora-spin{{from{{transform:rotate(0deg)}}to{{transform:rotate(360deg)}}}}';
+      style.id = 'barq-spin-style';
+      style.textContent = '@keyframes barq-spin{{from{{transform:rotate(0deg)}}to{{transform:rotate(360deg)}}}}';
       document.head.appendChild(style);
     }}
 

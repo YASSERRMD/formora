@@ -1,8 +1,8 @@
 [package]
-name = "formora-core"
+name = "barq-chat-form-core"
 version = "0.1.0"
 edition = "2021"
-description = "Form rendering engine for interactive chat widgets"
+description = "Barq chat form rendering engine for interactive chat widgets"
 license = "MIT"
 
 [dependencies]
