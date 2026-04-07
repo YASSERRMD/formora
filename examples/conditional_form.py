@@ -4,7 +4,7 @@ Conditional Form Example
 This example demonstrates conditional field visibility based on other field values.
 """
 
-from formora import Form, CssFramework, Condition
+from barq_chat_form import Form, CssFramework, Condition
 
 html = (
     Form("event_registration")

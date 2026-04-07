@@ -4,7 +4,7 @@ Simple Formora Example
 This example demonstrates basic form creation with Formora.
 """
 
-from formora import Form, CssFramework, Rule
+from barq_chat_form import Form, CssFramework, Rule
 
 # Create a simple contact form
 html = (

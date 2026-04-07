@@ -1,4 +1,4 @@
-# Formora
+# Barq Chat Form
 
 > Interactive form widgets for chat and LLM applications — powered by a high-performance Rust core with first-class bindings for **Python**, **TypeScript/WASM**, **Go**, and **C#**.
 
@@ -6,11 +6,11 @@
 
 ## What is Formora?
 
-Formora generates rich, interactive HTML forms that integrate seamlessly into chat UIs and LLM pipelines. Write your form once, render it in any language, parse submissions back to strongly-typed data.
+Barq Chat Form generates rich, interactive HTML forms that integrate seamlessly into chat UIs and LLM pipelines. Write your form once, render it in any language, parse submissions back to strongly-typed data.
 
 ```
 ┌─────────────────────────────┐
-│        formora-core         │  ← Rust engine (rendering, parsing, validation)
+│        barq-chat-form-core         │  ← Rust engine (rendering, parsing, validation)
 └───────────────┬─────────────┘
                 │
     ┌───────────┼───────────────────┐
@@ -18,7 +18,7 @@ Formora generates rich, interactive HTML forms that integrate seamlessly into ch
   PyO3       wasm-bindgen      C FFI (cdylib)
     │           │                   │
 ┌───┴───┐  ┌───┴───┐    ┌──────────┴──────────┐
-│  py   │  │  js   │    │   formora-c          │
+│  py   │  │  js   │    │   barq-chat-form-c │
 └───────┘  └───────┘    └──────┬───────────────┘
                                │
                      ┌─────────┴─────────┐
@@ -50,11 +50,11 @@ Formora generates rich, interactive HTML forms that integrate seamlessly into ch
 
 | Package | Language | Mechanism | Status |
 |---------|----------|-----------|--------|
-| [`formora-py`](formora-py) | Python 3.9+ | PyO3 native extension | ✅ |
-| [`formora-js`](formora-js) | TypeScript / Node.js / Browser | wasm-bindgen + wasm-pack | ✅ |
-| [`formora-go`](formora-go) | Go 1.21+ | cgo → formora-c | ✅ |
-| [`formora-cs`](formora-cs) | C# / .NET 8+ | P/Invoke → formora-c | ✅ |
-| [`formora-c`](formora-c) | C / any C-ABI language | cdylib + `formora.h` | ✅ |
+| [`barq-chat-form-py`](barq-chat-form-py) | Python 3.9+ | PyO3 native extension | ✅ |
+| [`barq-chat-form-js`](barq-chat-form-js) | TypeScript / Node.js / Browser | wasm-bindgen + wasm-pack | ✅ |
+| [`barq-chat-form-go`](barq-chat-form-go) | Go 1.21+ | cgo → barq-chat-form-c | ✅ |
+| [`barq-chat-form-cs`](barq-chat-form-cs) | C# / .NET 8+ | P/Invoke → barq-chat-form-c | ✅ |
+| [`barq-chat-form-c`](barq-chat-form-c) | C / any C-ABI language | cdylib + `barq_chat_form.h` | ✅ |
 
 ---
 
@@ -63,11 +63,11 @@ Formora generates rich, interactive HTML forms that integrate seamlessly into ch
 ### Python
 
 ```bash
-pip install formora
+pip install barq-chat-form
 ```
 
 ```python
-from formora import Form, Rule, CssFramework
+from barq_chat_form import Form, Rule, CssFramework
 
 html = (Form("contact")
     .title("Contact Us")
@@ -84,11 +84,11 @@ html = (Form("contact")
 
 ```bash
 # Build the WASM package first
-cd formora-js && wasm-pack build --target bundler --out-dir wasm --out-name formora_js
+cd barq-chat-form-js && wasm-pack build --target bundler --out-dir wasm --out-name barq_chat_form_js
 ```
 
 ```typescript
-import init, { Form, Rule, CssFramework } from "./wasm/formora_js";
+import init, { Form, Rule, CssFramework } from "./wasm/barq_chat_form_js";
 
 await init();
 
@@ -106,21 +106,21 @@ const html = new Form("contact")
 ### Go
 
 ```bash
-cd formora-go && ./build.sh
-export DYLD_LIBRARY_PATH="$PWD/../formora-c/target/release:$DYLD_LIBRARY_PATH"  # macOS
+cd barq-chat-form-go && ./build.sh
+export DYLD_LIBRARY_PATH="$PWD/../barq-chat-form-c/target/release:$DYLD_LIBRARY_PATH"  # macOS
 ```
 
 ```go
-import "github.com/YASSERRMD/formora/go/formora"
+import "github.com/YASSERRMD/barq-chat-form/go/barq"
 
-form := formora.NewForm("")
+form := barq.NewForm("")
 defer form.Free()
 
 html := form.
     Title("Contact Us").
-    CSSFramework(formora.Bootstrap()).
-    Text(formora.TextField{ID: "name", Label: "Full Name", Required: true}).
-    Email(formora.EmailField{ID: "email", Label: "Email", Required: true}).
+    CSSFramework(barq.Bootstrap()).
+    Text(barq.TextField{ID: "name", Label: "Full Name", Required: true}).
+    Email(barq.EmailField{ID: "email", Label: "Email", Required: true}).
     SubmitLabel("Send").
     Build()
 ```
@@ -128,12 +128,12 @@ html := form.
 ### C# / .NET
 
 ```bash
-cd formora-cs && ./build.sh
-export LD_LIBRARY_PATH="$PWD/../formora-c/target/release:$LD_LIBRARY_PATH"  # Linux
+cd barq-chat-form-cs && ./build.sh
+export LD_LIBRARY_PATH="$PWD/../barq-chat-form-c/target/release:$LD_LIBRARY_PATH"  # Linux
 ```
 
 ```csharp
-using Formora;
+using BarqChatForm;
 
 using var form = new Form("contact");
 var html = form
@@ -184,20 +184,20 @@ All bindings support the same 12 field types:
 
 ## Parsing Submissions
 
-Forms emit `__formora__{...}` messages when submitted. Parse them in any language:
+Forms emit `__barq__{...}` messages when submitted. Parse them in any language:
 
 **Python**
 ```python
-from formora import parse, is_formora_message
+from barq_chat_form import parse, is_barq_message
 
-if is_formora_message(msg):
+if is_barq_message(msg):
     result = parse(msg)
     print(result.typed_data)
 ```
 
 **TypeScript**
 ```typescript
-import { parseMessage, isFormora } from "./wasm/formora_js";
+import { parseMessage, isBarq Chat Form } from "./wasm/barq_chat_form_js";
 
 if (isFormora(msg)) {
     const result = parseMessage(msg)!;
@@ -207,8 +207,8 @@ if (isFormora(msg)) {
 
 **Go**
 ```go
-if formora.IsFormora(msg) {
-    result := formora.ParseMessage(msg)
+if barq.IsBarq(msg) {
+    result := barq.ParseMessage(msg)
     defer result.Free()
     fmt.Println(result.TypedData())
 }
@@ -216,8 +216,8 @@ if formora.IsFormora(msg) {
 
 **C#**
 ```csharp
-if (FormoraParser.IsFormora(msg)) {
-    using var result = FormoraParser.ParseMessage(msg)!;
+if (BarqParser.IsBarq(msg)) {
+    using var result = BarqParser.ParseMessage(msg)!;
     Console.WriteLine(result.AsText());
 }
 ```
@@ -239,13 +239,13 @@ All bindings expose three LLM utilities:
 ## Repository Structure
 
 ```
-formora/
-├── formora-core/       # Rust library — rendering, parsing, validation engine
-├── formora-py/         # Python bindings (PyO3 + Maturin)
-├── formora-js/         # TypeScript/WASM bindings (wasm-bindgen + wasm-pack)
-├── formora-c/          # C-compatible shared library (cdylib) + formora.h header
-├── formora-go/         # Go bindings (cgo)
-├── formora-cs/         # C# / .NET bindings (P/Invoke)
+barq-chat-form/
+├── barq-chat-form-core/       # Rust library — rendering, parsing, validation engine
+├── barq-chat-form-py/         # Python bindings (PyO3 + Maturin)
+├── barq-chat-form-js/         # TypeScript/WASM bindings (wasm-bindgen + wasm-pack)
+├── barq-chat-form-c/   # C-compatible shared library (cdylib) + barq_chat_form.h header
+├── barq-chat-form-go/         # Go bindings (cgo)
+├── barq-chat-form-cs/         # C# / .NET bindings (P/Invoke)
 └── examples/           # Python examples
 ```
 
@@ -256,32 +256,32 @@ formora/
 ### Core (required for all bindings)
 
 ```bash
-cargo build --release -p formora-core
+cargo build --release -p barq-chat-form-core
 ```
 
 ### Python
 ```bash
-cd formora-py && maturin develop
+cd barq-chat-form-py && maturin develop
 ```
 
 ### TypeScript / WASM
 ```bash
-cd formora-js && wasm-pack build --target bundler --out-dir wasm --out-name formora_js
+cd barq-chat-form-js && wasm-pack build --target bundler --out-dir wasm --out-name barq_chat_form_js
 ```
 
 ### C shared library (required for Go and C#)
 ```bash
-cd formora-c && cargo build --release
+cd barq-chat-form-c && cargo build --release
 ```
 
 ### Go
 ```bash
-cd formora-go && ./build.sh && go vet ./formora/...
+cd barq-chat-form-go && ./build.sh && go vet ./barq/...
 ```
 
 ### C#
 ```bash
-cd formora-cs && ./build.sh && dotnet build src/Formora/Formora.csproj
+cd barq-chat-form-cs && ./build.sh && dotnet build src/Formora/Formora.csproj
 ```
 
 ---
@@ -292,10 +292,10 @@ The `build.yml` workflow runs on every push and pull request:
 
 | Job | What it builds |
 |-----|----------------|
-| `test-rust` | formora-core unit tests |
+| `test-rust` | barq-chat-form-core unit tests |
 | `build-python` | Python wheel via maturin |
-| `build-go` | formora-c + Go vet |
-| `build-csharp` | formora-c + dotnet build |
+| `build-go` | barq-chat-form-c + Go vet |
+| `build-csharp` | barq-chat-form-c + dotnet build |
 | `build-wasm` | wasm-pack + TypeScript type-check |
 
 ---
