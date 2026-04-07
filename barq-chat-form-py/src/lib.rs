@@ -2,9 +2,9 @@ use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use std::collections::HashMap;
 
-use formora_core::{
+use barq_chat_form_core::{
     CssProfile, FieldType, FormSchema, FieldSchema, ValidationRule, Condition, SelectOption, StepMeta,
-    parse, is_formora_message, FormResult,
+    parse, is_barq_message, FormResult,
     validator::serialize_rules,
     conditions::serialize_condition,
     builder::FormBuilder,
@@ -306,7 +306,7 @@ impl PyForm {
 
     fn step(&mut self, title: Option<String>) -> PyResult<PyForm> {
         self.schema.multi_step = true;
-        self.schema.steps.push(formora_core::schema::StepMeta {
+        self.schema.steps.push(barq_chat_form_core::schema::StepMeta {
             index: self.schema.steps.len(),
             title,
             field_ids: vec![],
@@ -681,7 +681,7 @@ impl PyForm {
     }
 
     fn build(&self) -> PyResult<String> {
-        Ok(formora_core::renderer::render(&self.schema))
+        Ok(barq_chat_form_core::renderer::render(&self.schema))
     }
 }
 
@@ -715,7 +715,7 @@ impl PyFormResult {
     }
 }
 
-/// Parse a formora message from Python
+/// Parse a barq chat form message from Python
 #[pyfunction]
 fn parse_message(message: String) -> PyResult<Option<PyFormResult>> {
     match parse(&message) {
@@ -724,10 +724,10 @@ fn parse_message(message: String) -> PyResult<Option<PyFormResult>> {
     }
 }
 
-/// Check if a message is a formora message from Python
+/// Check if a message is a barq chat form message from Python
 #[pyfunction]
-fn is_formora(message: String) -> bool {
-    is_formora_message(&message)
+fn is_barq(message: String) -> bool {
+    is_barq_message(&message)
 }
 
 /// Helper: Convert Python value to serde_json::Value
@@ -789,9 +789,9 @@ fn json_to_python(py: Python, value: &serde_json::Value) -> PyResult<PyObject> {
     }
 }
 
-/// The formora Python module
+/// The barq_chat_form Python module
 #[pymodule]
-fn formora(_py: Python, m: &PyModule) -> PyResult<()> {
+fn barq_chat_form(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<CssFramework>()?;
     m.add_class::<PyCssProfile>()?;
     m.add_class::<PyRule>()?;
@@ -799,6 +799,6 @@ fn formora(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<PyForm>()?;
     m.add_class::<PyFormResult>()?;
     m.add_function(wrap_pyfunction!(parse_message, m)?)?;
-    m.add_function(wrap_pyfunction!(is_formora, m)?)?;
+    m.add_function(wrap_pyfunction!(is_barq, m)?)?;
     Ok(())
 }

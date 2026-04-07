@@ -3,9 +3,9 @@ requires = ["maturin>=1.4"]
 build-backend = "maturin"
 
 [project]
-name = "formora"
+name = "barq-chat-form"
 version = "0.1.0"
-description = "Interactive form widgets for chat applications"
+description = "Interactive chat form widgets for chat applications"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
@@ -36,4 +36,4 @@ dev = ["pyo3-stub-gen>=0.3.0"]
 
 [tool.stub-gen]
 # Configure pyo3-stub-gen settings
-virtual_path = "formora/formora"
+virtual_path = "barq_chat_form/barq_chat_form"

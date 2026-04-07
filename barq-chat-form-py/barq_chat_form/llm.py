@@ -1,15 +1,15 @@
 """
-LLM utility functions for Formora.
+LLM utility functions for Barq Chat Form.
 
 This module provides helper functions for integrating Formora with LLM applications,
 including JSON Schema generation and form result formatting.
 """
 
 from typing import Any, Dict, List, Optional
-from .formora import Form, FormResult
+from .barq_chat_form import Form, FormResult
 
 
-class FormoraTypeError(Exception):
+class BarqTypeError(Exception):
     """Raised when form result type doesn't match expected schema."""
     pass
 
@@ -58,7 +58,7 @@ def form_to_json_schema(form: Form) -> Dict[str, Any]:
 
 
 def _field_type_to_json_schema(field) -> Dict[str, Any]:
-    """Map a Formora field type to its JSON Schema representation."""
+    """Map a Barq field type to its JSON Schema representation."""
     field_type = field.field_type
 
     if field_type in ("Text", "Email", "Textarea", "Date", "File"):
@@ -108,7 +108,7 @@ def form_result_to_tool_args(result: FormResult, form: Form) -> Dict[str, Any]:
         A cleaned dictionary with validated types
 
     Raises:
-        FormoraTypeError: If a value's type doesn't match the schema
+        BarqTypeError: If a value's type doesn't match the schema
     """
     args = {}
 
@@ -122,7 +122,7 @@ def form_result_to_tool_args(result: FormResult, form: Form) -> Dict[str, Any]:
         # Get the value from typed_data
         if field_id not in result.typed_data:
             if field.required:
-                raise FormoraTypeError(f"Required field '{field_id}' missing from form result")
+                raise BarqTypeError(f"Required field '{field_id}' missing from form result")
             continue
 
         value = result.typed_data[field_id]
@@ -141,43 +141,43 @@ def _validate_field_type(field, value: Any, field_id: str) -> None:
 
     if value is None:
         if field.required:
-            raise FormoraTypeError(f"Required field '{field_id}' is None")
+            raise BarqTypeError(f"Required field '{field_id}' is None")
         return
 
     if field_type in ("Text", "Email", "Textarea", "Date", "Select", "Radio"):
         if not isinstance(value, str):
-            raise FormoraTypeError(
+            raise BarqTypeError(
                 f"Field '{field_id}' expected string, got {type(value).__name__}"
             )
 
     elif field_type in ("Number", "Range"):
         if not isinstance(value, (int, float)):
-            raise FormoraTypeError(
+            raise BarqTypeError(
                 f"Field '{field_id}' expected number, got {type(value).__name__}"
             )
         # Check min/max constraints
         if field.min is not None and value < field.min:
-            raise FormoraTypeError(
+            raise BarqTypeError(
                 f"Field '{field_id}' value {value} is below minimum {field.min}"
             )
         if field.max is not None and value > field.max:
-            raise FormoraTypeError(
+            raise BarqTypeError(
                 f"Field '{field_id}' value {value} is above maximum {field.max}"
             )
 
     elif field_type == "Checkbox":
         if not isinstance(value, bool):
-            raise FormoraTypeError(
+            raise BarqTypeError(
                 f"Field '{field_id}' expected bool, got {type(value).__name__}"
             )
 
     elif field_type == "MultiSelect":
         if not isinstance(value, list):
-            raise FormoraTypeError(
+            raise BarqTypeError(
                 f"Field '{field_id}' expected list, got {type(value).__name__}"
             )
         if not all(isinstance(item, str) for item in value):
-            raise FormoraTypeError(
+            raise BarqTypeError(
                 f"Field '{field_id}' list must contain only strings"
             )
 
