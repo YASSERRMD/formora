@@ -4,33 +4,33 @@ package main
 
 import (
 	"fmt"
-	"github.com/YASSERRMD/formora/go/formora"
+	"github.com/YASSERRMD/barq-chat-form/go/barq"
 )
 
 func main() {
-	form := formora.NewForm("onboarding")
+	form := barq.NewForm("onboarding")
 	defer form.Free()
 
 	form.
 		Title("Welcome to Formora").
 		Description("Complete your profile in 3 easy steps.").
-		CSSFramework(formora.Tailwind()).
+		CSSFramework(barq.Tailwind()).
 		// Step 1
 		Step("Personal Information").
-		Text(formora.TextField{
+		Text(barq.TextField{
 			ID: "full_name", Label: "Full Name", Required: true,
-			Rules: []formora.Rule{formora.RuleRequired(nil), formora.RuleMinLength(2, nil)},
+			Rules: []barq.Rule{barq.RuleRequired(nil), barq.RuleMinLength(2, nil)},
 		}).
-		Email(formora.EmailField{
+		Email(barq.EmailField{
 			ID: "email", Label: "Work Email", Required: true,
-			Rules: []formora.Rule{formora.RuleRequired(nil), formora.RuleEmail(nil)},
+			Rules: []barq.Rule{barq.RuleRequired(nil), barq.RuleEmail(nil)},
 		}).
-		Text(formora.TextField{ID: "company", Label: "Company", Required: true}).
+		Text(barq.TextField{ID: "company", Label: "Company", Required: true}).
 		// Step 2
 		Step("Role & Experience").
-		Select(formora.SelectField{
+		Select(barq.SelectField{
 			ID: "role", Label: "Your Role", Required: true,
-			Options: []formora.Option{
+			Options: []barq.Option{
 				{Label: "Developer", Value: "developer"},
 				{Label: "Designer", Value: "designer"},
 				{Label: "Product Manager", Value: "pm"},
@@ -38,13 +38,13 @@ func main() {
 				{Label: "Other", Value: "other"},
 			},
 		}).
-		Range(formora.RangeField{
+		Range(barq.RangeField{
 			ID: "years_exp", Label: "Years of Experience",
-			Min: 0, Max: 30, Step: formora.F64(1), Default: formora.F64(0),
+			Min: 0, Max: 30, Step: barq.F64(1), Default: barq.F64(0),
 		}).
-		MultiSelect(formora.MultiSelectField{
+		MultiSelect(barq.MultiSelectField{
 			ID: "technologies", Label: "Technologies You Use",
-			Options: []formora.Option{
+			Options: []barq.Option{
 				{Label: "TypeScript", Value: "typescript"},
 				{Label: "Rust", Value: "rust"},
 				{Label: "Python", Value: "python"},
@@ -54,21 +54,21 @@ func main() {
 		}).
 		// Step 3
 		Step("Preferences").
-		Radio(formora.RadioField{
+		Radio(barq.RadioField{
 			ID: "frequency", Label: "How often do you ship?", Required: true,
-			Options: []formora.Option{
+			Options: []barq.Option{
 				{Label: "Daily", Value: "daily"},
 				{Label: "Weekly", Value: "weekly"},
 				{Label: "Monthly", Value: "monthly"},
 			},
 		}).
-		Checkbox(formora.CheckboxField{
+		Checkbox(barq.CheckboxField{
 			ID: "agree_terms", Label: "I agree to the Terms of Service",
-			Rules: []formora.Rule{formora.RuleRequired(formora.Ptr("You must accept the terms"))},
+			Rules: []barq.Rule{barq.RuleRequired(barq.Ptr("You must accept the terms"))},
 		}).
-		Checkbox(formora.CheckboxField{
+		Checkbox(barq.CheckboxField{
 			ID: "agree_privacy", Label: "I agree to the Privacy Policy",
-			Rules: []formora.Rule{formora.RuleRequired(formora.Ptr("You must accept the privacy policy"))},
+			Rules: []barq.Rule{barq.RuleRequired(barq.Ptr("You must accept the privacy policy"))},
 		}).
 		SubmitLabel("Complete Setup").
 		SuccessMessage("You're all set! Welcome aboard.")

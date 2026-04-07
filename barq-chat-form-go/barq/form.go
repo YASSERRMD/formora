@@ -1,7 +1,7 @@
-package formora
+package barq
 
 /*
-#include "formora.h"
+#include "barq_chat_form.h"
 #include <stdlib.h>
 #include <math.h>
 */
@@ -13,9 +13,9 @@ import (
 	"unsafe"
 )
 
-// Form is a fluent form builder backed by a formora-c handle.
+// Form is a fluent form builder backed by a barq-chat-form-c handle.
 type Form struct {
-	ptr *C.FormoraForm
+	ptr *C.BarqForm
 }
 
 // NewForm creates a new form. Pass an empty string for id to auto-generate a UUID.
@@ -25,13 +25,13 @@ func NewForm(id string) *Form {
 		cidPtr = cStr(id)
 		defer C.free(unsafe.Pointer(cidPtr))
 	}
-	return &Form{ptr: C.formora_form_new(cidPtr)}
+	return &Form{ptr: C.barq_form_new(cidPtr)}
 }
 
 // Free releases the underlying Rust handle.
 func (f *Form) Free() {
 	if f.ptr != nil {
-		C.formora_form_free(f.ptr)
+		C.barq_form_free(f.ptr)
 		f.ptr = nil
 	}
 }
@@ -40,7 +40,7 @@ func (f *Form) Free() {
 func (f *Form) Title(text string) *Form {
 	s := cStr(text)
 	defer C.free(unsafe.Pointer(s))
-	C.formora_form_title(f.ptr, s)
+	C.barq_form_title(f.ptr, s)
 	return f
 }
 
@@ -48,19 +48,19 @@ func (f *Form) Title(text string) *Form {
 func (f *Form) Description(text string) *Form {
 	s := cStr(text)
 	defer C.free(unsafe.Pointer(s))
-	C.formora_form_description(f.ptr, s)
+	C.barq_form_description(f.ptr, s)
 	return f
 }
 
 // CSSFramework sets the CSS framework (Bootstrap, Tailwind, or Custom).
 func (f *Form) CSSFramework(fw *CssFramework) *Form {
-	C.formora_form_css_framework(f.ptr, fw.ptr)
+	C.barq_form_css_framework(f.ptr, fw.ptr)
 	return f
 }
 
 // CSSProfile sets a custom CSS profile.
 func (f *Form) CSSProfile(p *CssProfile) *Form {
-	C.formora_form_css_profile(f.ptr, p.ptr)
+	C.barq_form_css_profile(f.ptr, p.ptr)
 	return f
 }
 
@@ -71,7 +71,7 @@ func (f *Form) Step(title string) *Form {
 		s = cStr(title)
 		defer C.free(unsafe.Pointer(s))
 	}
-	C.formora_form_step(f.ptr, s)
+	C.barq_form_step(f.ptr, s)
 	return f
 }
 
@@ -79,7 +79,7 @@ func (f *Form) Step(title string) *Form {
 func (f *Form) SubmitLabel(text string) *Form {
 	s := cStr(text)
 	defer C.free(unsafe.Pointer(s))
-	C.formora_form_submit_label(f.ptr, s)
+	C.barq_form_submit_label(f.ptr, s)
 	return f
 }
 
@@ -87,18 +87,18 @@ func (f *Form) SubmitLabel(text string) *Form {
 func (f *Form) SuccessMessage(text string) *Form {
 	s := cStr(text)
 	defer C.free(unsafe.Pointer(s))
-	C.formora_form_success_message(f.ptr, s)
+	C.barq_form_success_message(f.ptr, s)
 	return f
 }
 
 // Build renders the form to an HTML string.
 func (f *Form) Build() string {
-	return goStr(C.formora_form_build(f.ptr))
+	return goStr(C.barq_form_build(f.ptr))
 }
 
 // SchemaJSON returns the form schema as a JSON string.
 func (f *Form) SchemaJSON() string {
-	return goStr(C.formora_form_schema_json(f.ptr))
+	return goStr(C.barq_form_schema_json(f.ptr))
 }
 
 // ── Field option types ─────────────────────────────────────────────────────────
@@ -149,7 +149,7 @@ func (f *Form) Text(cfg TextField) *Form {
 		freeIfNotNil(ph); freeIfNotNil(ht); freeIfNotNil(dv)
 		freeIfNotNil(ru); freeIfNotNil(si)
 	}()
-	C.formora_form_text(f.ptr, id, lb, ph, boolToInt(cfg.Required), ht, dv, ru, si)
+	C.barq_form_text(f.ptr, id, lb, ph, boolToInt(cfg.Required), ht, dv, ru, si)
 	return f
 }
 
@@ -176,7 +176,7 @@ func (f *Form) Email(cfg EmailField) *Form {
 		C.free(unsafe.Pointer(id)); C.free(unsafe.Pointer(lb))
 		freeIfNotNil(ht); freeIfNotNil(dv); freeIfNotNil(ru); freeIfNotNil(si)
 	}()
-	C.formora_form_email(f.ptr, id, lb, boolToInt(cfg.Required), ht, dv, ru, si)
+	C.barq_form_email(f.ptr, id, lb, boolToInt(cfg.Required), ht, dv, ru, si)
 	return f
 }
 
@@ -213,7 +213,7 @@ func (f *Form) Number(cfg NumberField) *Form {
 	maxVal := math.NaN()
 	if cfg.Min != nil { minVal = *cfg.Min }
 	if cfg.Max != nil { maxVal = *cfg.Max }
-	C.formora_form_number(f.ptr, id, lb, C.double(minVal), C.double(maxVal),
+	C.barq_form_number(f.ptr, id, lb, C.double(minVal), C.double(maxVal),
 		boolToInt(cfg.Required), ht, dv, ru, si)
 	return f
 }
@@ -244,7 +244,7 @@ func (f *Form) Textarea(cfg TextareaField) *Form {
 		C.free(unsafe.Pointer(id)); C.free(unsafe.Pointer(lb))
 		freeIfNotNil(ph); freeIfNotNil(ht); freeIfNotNil(dv); freeIfNotNil(ru); freeIfNotNil(si)
 	}()
-	C.formora_form_textarea(f.ptr, id, lb, C.uint(cfg.Rows), ph, boolToInt(cfg.Required), ht, dv, ru, si)
+	C.barq_form_textarea(f.ptr, id, lb, C.uint(cfg.Rows), ph, boolToInt(cfg.Required), ht, dv, ru, si)
 	return f
 }
 
@@ -273,7 +273,7 @@ func (f *Form) Select(cfg SelectField) *Form {
 		C.free(unsafe.Pointer(id)); C.free(unsafe.Pointer(lb))
 		freeIfNotNil(opts); freeIfNotNil(ht); freeIfNotNil(dv); freeIfNotNil(ru); freeIfNotNil(si)
 	}()
-	C.formora_form_select(f.ptr, id, lb, opts, boolToInt(cfg.Required), ht, dv, ru, si)
+	C.barq_form_select(f.ptr, id, lb, opts, boolToInt(cfg.Required), ht, dv, ru, si)
 	return f
 }
 
@@ -306,7 +306,7 @@ func (f *Form) MultiSelect(cfg MultiSelectField) *Form {
 		C.free(unsafe.Pointer(id)); C.free(unsafe.Pointer(lb))
 		freeIfNotNil(opts); freeIfNotNil(ht); freeIfNotNil(dv); freeIfNotNil(ru); freeIfNotNil(si)
 	}()
-	C.formora_form_multi_select(f.ptr, id, lb, opts, boolToInt(cfg.Required), ht, dv, ru, si)
+	C.barq_form_multi_select(f.ptr, id, lb, opts, boolToInt(cfg.Required), ht, dv, ru, si)
 	return f
 }
 
@@ -331,7 +331,7 @@ func (f *Form) Checkbox(cfg CheckboxField) *Form {
 		C.free(unsafe.Pointer(id)); C.free(unsafe.Pointer(lb))
 		freeIfNotNil(ht); freeIfNotNil(ru); freeIfNotNil(si)
 	}()
-	C.formora_form_checkbox(f.ptr, id, lb, boolToInt(cfg.Default), ht, ru, si)
+	C.barq_form_checkbox(f.ptr, id, lb, boolToInt(cfg.Default), ht, ru, si)
 	return f
 }
 
@@ -360,7 +360,7 @@ func (f *Form) Radio(cfg RadioField) *Form {
 		C.free(unsafe.Pointer(id)); C.free(unsafe.Pointer(lb))
 		freeIfNotNil(opts); freeIfNotNil(ht); freeIfNotNil(dv); freeIfNotNil(ru); freeIfNotNil(si)
 	}()
-	C.formora_form_radio(f.ptr, id, lb, opts, boolToInt(cfg.Required), ht, dv, ru, si)
+	C.barq_form_radio(f.ptr, id, lb, opts, boolToInt(cfg.Required), ht, dv, ru, si)
 	return f
 }
 
@@ -387,7 +387,7 @@ func (f *Form) Date(cfg DateField) *Form {
 		C.free(unsafe.Pointer(id)); C.free(unsafe.Pointer(lb))
 		freeIfNotNil(ht); freeIfNotNil(dv); freeIfNotNil(ru); freeIfNotNil(si)
 	}()
-	C.formora_form_date(f.ptr, id, lb, boolToInt(cfg.Required), ht, dv, ru, si)
+	C.barq_form_date(f.ptr, id, lb, boolToInt(cfg.Required), ht, dv, ru, si)
 	return f
 }
 
@@ -417,7 +417,7 @@ func (f *Form) Range(cfg RangeField) *Form {
 	if cfg.Step != nil { step = *cfg.Step }
 	def := math.NaN()
 	if cfg.Default != nil { def = *cfg.Default }
-	C.formora_form_range(f.ptr, id, lb, C.double(cfg.Min), C.double(cfg.Max),
+	C.barq_form_range(f.ptr, id, lb, C.double(cfg.Min), C.double(cfg.Max),
 		C.double(step), C.double(def), ht, si)
 	return f
 }
@@ -449,7 +449,7 @@ func (f *Form) File(cfg FileField) *Form {
 		C.free(unsafe.Pointer(id)); C.free(unsafe.Pointer(lb))
 		freeIfNotNil(acc); freeIfNotNil(ht); freeIfNotNil(ru); freeIfNotNil(si)
 	}()
-	C.formora_form_file(f.ptr, id, lb, acc, boolToInt(cfg.Required), ht, ru, si)
+	C.barq_form_file(f.ptr, id, lb, acc, boolToInt(cfg.Required), ht, ru, si)
 	return f
 }
 
@@ -458,7 +458,7 @@ func (f *Form) Hidden(id, value string) *Form {
 	cid := cStr(id)
 	cv := cStr(value)
 	defer func() { C.free(unsafe.Pointer(cid)); C.free(unsafe.Pointer(cv)) }()
-	C.formora_form_hidden(f.ptr, cid, cv)
+	C.barq_form_hidden(f.ptr, cid, cv)
 	return f
 }
 

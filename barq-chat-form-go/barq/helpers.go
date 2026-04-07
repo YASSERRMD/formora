@@ -1,7 +1,7 @@
-package formora
+package barq
 
 /*
-#include "formora.h"
+#include "barq_chat_form.h"
 #include <stdlib.h>
 */
 import "C"
@@ -18,13 +18,13 @@ func cStrOpt(s *string) *C.char {
 	return C.CString(*s)
 }
 
-// goStr converts a C string returned by formora into a Go string and frees it.
+// goStr converts a C string returned by barq-chat-form into a Go string and frees it.
 func goStr(s *C.char) string {
 	if s == nil {
 		return ""
 	}
 	v := C.GoString(s)
-	C.formora_free_string(s)
+	C.barq_free_string(s)
 	return v
 }
 
