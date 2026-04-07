@@ -52,5 +52,5 @@ CssProfile {
 
 
 pub fn minimal_inline_styles() -> String {
-    String::from("\n<style>\n.formora-widget { font-family: system-ui, sans-serif; }\n.formora-widget input, .formora-widget select, .formora-widget textarea { display: block; width: 100%; margin-bottom: 10px; padding: 8px; }\n.formora-widget button { padding: 8px 16px; cursor: pointer; }\n</style>\n")
+    String::from("\n<style>\n.barq-widget { font-family: system-ui, sans-serif; }\n.barq-widget input, .barq-widget select, .barq-widget textarea { display: block; width: 100%; margin-bottom: 10px; padding: 8px; }\n.barq-widget button { padding: 8px 16px; cursor: pointer; }\n</style>\n")
 }

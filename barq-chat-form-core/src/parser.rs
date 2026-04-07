@@ -3,10 +3,10 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-/// Prefix for formora messages
-pub const FORMORA_PREFIX: &str = "__formora__";
+/// Prefix for barq chat form messages
+pub const BARQ_PREFIX: &str = "__barq__";
 
-/// Result of parsing a formora message
+/// Result of parsing a barq message
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FormResult {
     pub form_id: String,
@@ -41,18 +41,18 @@ impl FormResult {
     }
 }
 
-/// Check if a message is a formora message
-pub fn is_formora_message(message: &str) -> bool {
-    message.starts_with(FORMORA_PREFIX)
+/// Check if a message is a barq chat form message
+pub fn is_barq_message(message: &str) -> bool {
+    message.starts_with(BARQ_PREFIX)
 }
 
-/// Parse a formora message
+/// Parse a barq chat form message
 pub fn parse(message: &str) -> Option<FormResult> {
-    if !is_formora_message(message) {
+    if !is_barq_message(message) {
         return None;
     }
 
-    let json_str = message.strip_prefix(FORMORA_PREFIX)?;
+    let json_str = message.strip_prefix(BARQ_PREFIX)?;
     let parsed: serde_json::Value = serde_json::from_str(json_str).ok()?;
 
     let form_id = parsed.get("form_id")?.as_str()?.to_string();
